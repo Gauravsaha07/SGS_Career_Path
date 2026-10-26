@@ -3,25 +3,63 @@ import Sidebar from '../components/Sidebar';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import StatusBadge from '../components/StatusBadge';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import creditService from '../services/creditService';
+import authService from '../services/authService';
+import { setUser } from '../features/auth/authSlice';
+import toast from 'react-hot-toast';
+import { useEffect } from 'react';
 
 export default function MyCredits() {
-
-  const { user } = useSelector(state => state.auth)
-
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+  const { user } = useSelector(state => state.auth);
 
   const packs = [
-    { name: 'Starter Pack', credits: '100 Credits', price: '₹299', perCredit: '₹2.99 / credit', popular: false, badge: 'STARTER' },
-    { name: 'Student Value Pack', credits: '300 Credits', price: '₹699', perCredit: '₹2.33 / credit', popular: true, badge: 'MOST POPULAR 🔥' },
-    { name: 'Pro Career Pack', credits: '700 Credits', price: '₹1,299', perCredit: '₹1.85 / credit', popular: false, badge: 'BEST VALUE' },
+    { name: 'Starter Pack', credits: '100', displayCredits: '100 Credits', price: '₹299', perCredit: '₹2.99 / credit', popular: false, badge: 'STARTER' },
+    { name: 'Student Value Pack', credits: '300', displayCredits: '300 Credits', price: '₹699', perCredit: '₹2.33 / credit', popular: true, badge: 'MOST POPULAR 🔥' },
+    { name: 'Pro Career Pack', credits: '700', displayCredits: '700 Credits', price: '₹1,299', perCredit: '₹1.85 / credit', popular: false, badge: 'BEST VALUE' },
   ];
 
-  const transactions = [
-    { id: 'tx-501', title: '1-on-1 Session with Dr. Ramesh Kumar', type: 'Deduction', credits: '-50 Credits', date: '23 Jul 2026', status: 'Completed' },
-    { id: 'tx-502', title: 'AI Roadmap Generation (Full-Stack Track)', type: 'Deduction', credits: '-10 Credits', date: '22 Jul 2026', status: 'Completed' },
-    { id: 'tx-503', title: 'Welcome Signup Bonus Grant', type: 'Credit Top-up', credits: '+100 Credits', date: '20 Jul 2026', status: 'Granted' },
-    { id: 'tx-504', title: 'UPI Payment #UPI890321 (Starter Pack)', type: 'Purchase', credits: '+80 Credits', date: '20 Jul 2026', status: 'Success' },
-  ];
+  // Fetch live credit balance
+  const { data: meData } = useQuery({
+    queryKey: ['me'],
+    queryFn: () => authService.getMe(user?.token),
+    enabled: !!user?.token
+  });
+
+  useEffect(() => {
+    if (meData && meData.credits !== undefined && meData.credits !== user?.credits) {
+      dispatch(setUser({ ...user, credits: meData.credits }));
+    }
+  }, [meData, user, dispatch]);
+
+  // Fetch real credit history
+  const { data: historyData, isLoading: historyLoading } = useQuery({
+    queryKey: ['credit-history'],
+    queryFn: () => creditService.fetchCreditHistory(user?.token),
+    enabled: !!user?.token
+  });
+
+  const requestMutation = useMutation({
+    mutationFn: (creditsAmount) => creditService.requestCredits(creditsAmount, user.token),
+    onSuccess: (data) => {
+      toast.success(`Top-up request for ${data.credits} credits submitted successfully! Pending admin verification.`);
+      queryClient.invalidateQueries({ queryKey: ['credit-history'] });
+    },
+    onError: (err) => {
+      toast.error(err?.response?.data?.message || err?.message || "Could not raise credit request");
+    }
+  });
+
+  const handleBuyPack = (pack) => {
+    if (!user) {
+      toast.error("Please log in to purchase credits");
+      return;
+    }
+    requestMutation.mutate(pack.credits);
+  };
 
   return (
     <div className="min-h-screen bg-parchment flex flex-col">
@@ -48,7 +86,9 @@ export default function MyCredits() {
 
               <div className="bg-parchment-card border-3 border-navy p-6 rounded-2xl shadow-pop text-center min-w-[220px]">
                 <div className="font-mono text-xs font-bold text-navy-muted uppercase">AVAILABLE BALANCE</div>
-                <div className="font-grotesk font-extrabold text-4xl text-rust mt-1">{user?.credits} <span className="text-base text-navy">pts</span></div>
+                <div className="font-grotesk font-extrabold text-4xl text-rust mt-1">
+                  {user?.credits ?? 0} <span className="text-base text-navy">pts</span>
+                </div>
                 <StatusBadge text="ACTIVE WALLET" status="success" />
               </div>
             </div>
@@ -73,7 +113,7 @@ export default function MyCredits() {
                     </div>
 
                     <h3 className="font-grotesk font-extrabold text-2xl text-navy">{p.name}</h3>
-                    <div className="font-grotesk font-extrabold text-3xl text-rust mt-2">{p.credits}</div>
+                    <div className="font-grotesk font-extrabold text-3xl text-rust mt-2">{p.displayCredits}</div>
                     <div className="font-mono text-xl font-bold text-navy mt-1">{p.price} <span className="text-xs text-navy-muted">inclusive GST</span></div>
 
                     <ul className="mt-4 space-y-2 font-body text-xs text-navy border-t-2 border-navy/20 pt-4">
@@ -89,8 +129,13 @@ export default function MyCredits() {
                   </div>
 
                   <div className="mt-6 pt-4 border-t-2 border-navy/20">
-                    <Button variant={p.popular ? 'accent' : 'primary'} size="md" className="w-full">
-                      Pay {p.price} via UPI / Card →
+                    <Button
+                      clickAction={() => handleBuyPack(p)}
+                      variant={p.popular ? 'accent' : 'primary'}
+                      size="md"
+                      className="w-full"
+                    >
+                      {requestMutation.isPending ? "Processing..." : `Pay ${p.price} via UPI / Card →`}
                     </Button>
                   </div>
                 </Card>
@@ -113,19 +158,46 @@ export default function MyCredits() {
                   </tr>
                 </thead>
                 <tbody className="divide-y-2 divide-navy/10">
-                  {transactions.map((tx) => (
-                    <tr key={tx.id} className="hover:bg-parchment/60 font-mono">
-                      <td className="p-3 font-bold text-navy">{tx.title}</td>
-                      <td className="p-3 text-navy-muted">{tx.type}</td>
-                      <td className={`p-3 font-bold ${tx.credits.startsWith('+') ? 'text-green-600' : 'text-rust'}`}>
-                        {tx.credits}
-                      </td>
-                      <td className="p-3 text-navy-muted">{tx.date}</td>
-                      <td className="p-3">
-                        <StatusBadge text={tx.status} status={tx.status === 'Success' || tx.status === 'Granted' ? 'success' : 'info'} />
+                  {historyLoading ? (
+                    <tr>
+                      <td colSpan="5" className="p-6 text-center font-mono text-xs text-navy-muted">
+                        Loading credit transactions...
                       </td>
                     </tr>
-                  ))}
+                  ) : !historyData || historyData.length === 0 ? (
+                    <tr>
+                      <td colSpan="5" className="p-6 text-center font-mono text-xs text-navy-muted">
+                        No credit transactions yet. Top up credits to get started!
+                      </td>
+                    </tr>
+                  ) : (
+                    historyData.map((tx) => {
+                      const isPositive = tx.credits > 0;
+                      const displayCredits = isPositive ? `+${tx.credits} Credits` : `${tx.credits} Credits`;
+                      const title = isPositive
+                        ? `Top-Up Request (#${tx._id.slice(-6).toUpperCase()})`
+                        : `Platform Service Usage (#${tx._id.slice(-6).toUpperCase()})`;
+
+                      return (
+                        <tr key={tx._id} className="hover:bg-parchment/60 font-mono">
+                          <td className="p-3 font-bold text-navy">{title}</td>
+                          <td className="p-3 text-navy-muted">{isPositive ? "Top-up / Grant" : "Deduction"}</td>
+                          <td className={`p-3 font-bold ${isPositive ? 'text-green-600' : 'text-rust'}`}>
+                            {displayCredits}
+                          </td>
+                          <td className="p-3 text-navy-muted">
+                            {new Date(tx.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                          </td>
+                          <td className="p-3">
+                            <StatusBadge
+                              text={tx.status === 'granted' ? 'Granted' : tx.status === 'rejected' ? 'Rejected' : 'Pending'}
+                              status={tx.status === 'granted' ? 'success' : tx.status === 'rejected' ? 'warning' : 'info'}
+                            />
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
             </div>

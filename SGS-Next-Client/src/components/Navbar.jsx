@@ -5,18 +5,18 @@ import { logOutUser } from "../features/auth/authSlice";
 
 export default function Navbar({ activePage = 'dashboard' }) {
 
-  const { user } = useSelector(state => state.auth)
+  const { user } = useSelector(state => state.auth);
 
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const userType = user?.userType
+  const userType = user?.userType;
 
   const handleLogout = () => {
-    localStorage.removeItem('user')
-    dispatch(logOutUser())
-    navigate("/")
-  }
+    localStorage.removeItem('user');
+    dispatch(logOutUser());
+    navigate("/");
+  };
 
 
   return (
@@ -90,16 +90,16 @@ export default function Navbar({ activePage = 'dashboard' }) {
           {/* Credits Badge */}
           {
             userType?.toUpperCase() === "STUDENT" && (
-              <a
-                href="#"
-                className="flex items-center space-x-2 bg-rust-container border-2 border-navy px-3 py-1.5 rounded-full shadow-pop-sm hover:bg-rust-container/80 transition-all"
+              <Link
+                to="/auth/profile/my-credits"
+                className="flex items-center space-x-2 bg-rust-container border-2 border-navy px-3 py-1.5 rounded-full shadow-pop-sm hover:bg-rust-container/80 transition-all cursor-pointer"
               >
                 <span className="w-3 h-3 rounded-full bg-rust animate-pulse"></span>
-                <span className="font-mono text-xs font-bold text-navy">120 Credits</span>
+                <span className="font-mono text-xs font-bold text-navy">{user?.credits ?? 0} Credits</span>
                 <span className="bg-navy text-yellow text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full">
                   + Top-up
                 </span>
-              </a>
+              </Link>
             )
           }
 
@@ -116,7 +116,7 @@ export default function Navbar({ activePage = 'dashboard' }) {
           </div>
           <button
             onClick={handleLogout}
-            className="flex items-center space-x-2 bg-red-500 border-2 border-navy px-2.5 py-1 rounded-full shadow-pop-sm hover:bg-red-700"
+            className="flex items-center space-x-2 bg-red-500 border-2 border-navy px-2.5 py-1 rounded-full shadow-pop-sm hover:bg-red-700 cursor-pointer"
           >
             <div className="w-7 h-7 rounded-full bg-red-200 border border-navy flex items-center justify-center font-grotesk font-bold text-xs text-navy">
               <LogOut height={12} />
