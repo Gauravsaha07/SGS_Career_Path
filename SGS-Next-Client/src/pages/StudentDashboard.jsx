@@ -3,16 +3,46 @@ import Sidebar from '../components/Sidebar';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import StatusBadge from '../components/StatusBadge';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import roadmapService from '../services/roadmapService';
+import authService from '../services/authService';
+import { setUser } from '../features/auth/authSlice';
 
 export default function StudentDashboard() {
+  const { user } = useSelector(state => state.auth);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  const { user } = useSelector(state => state.auth)
+  // Sync latest user profile and credits
+  useEffect(() => {
+    if (user?.token) {
+      authService.getMe(user.token).then((freshData) => {
+        if (freshData && freshData._id) {
+          const updated = { ...user, ...freshData, token: user.token };
+          localStorage.setItem("user", JSON.stringify(updated));
+          dispatch(setUser(updated));
+        }
+      }).catch(() => {});
+    }
+  }, [user?.token, dispatch]);
 
-  const navigate = useNavigate()
+  useEffect(() => {
+    if (user?.userType === "ADMIN") {
+      navigate("/auth/admin");
+    } else if (user?.userType === "COUNSELOR") {
+      navigate("/auth/counselor");
+    }
+  }, [user, navigate]);
 
+  // Fetch real roadmaps from DB
+  const { data: roadmaps = [], isLoading: loadingRoadmaps } = useQuery({
+    queryKey: ['myRoadmaps', user?._id],
+    queryFn: () => roadmapService.fetchMyRoadmaps(user?.token),
+    enabled: !!user?.token
+  });
 
   const upcomingSessions = [
     {
@@ -35,34 +65,6 @@ export default function StudentDashboard() {
     },
   ];
 
-  const recentRoadmaps = [
-    {
-      id: 'rm-101',
-      title: 'Full-Stack Web Dev (MERN + Next.js)',
-      progress: 65,
-      currentStep: 'Phase 3: Backend APIs & MongoDB Security',
-      targetSalary: '₹8L - ₹15L / year',
-      badge: 'ACTIVE TRACK',
-    },
-    {
-      id: 'rm-102',
-      title: 'Data Analyst & Python PowerBI Path',
-      progress: 25,
-      currentStep: 'Phase 1: Advanced SQL & Data Cleaning',
-      targetSalary: '₹6L - ₹10L / year',
-      badge: 'IN PROGRESS',
-    },
-  ];
-
-
-  useEffect(() => {
-    if (user?.userType === "ADMIN") {
-      navigate("/auth/admin")
-    } else if (user?.userType === "COUNSELOR") {
-      navigate("/auth/counselor")
-    }
-  }, [user])
-
   return (
     <div className="min-h-screen bg-parchment flex flex-col">
       <Navbar activePage="dashboard" />
@@ -82,7 +84,7 @@ export default function StudentDashboard() {
                   Namaste, {user?.name}! Ready to level up? ⚡
                 </h1>
                 <p className="font-body text-sm text-navy-muted mt-1">
-                  You have <span className="font-bold text-navy">{user?.credits} Credits</span> available. Your current level is <span className="font-bold text-rust">{user?.qualification}</span>.
+                  You have <span className="font-bold text-navy">{user?.credits ?? 0} Credits</span> available. Your current level is <span className="font-bold text-rust">{user?.qualification || 'Undergraduate'}</span>.
                 </p>
               </div>
 
@@ -90,7 +92,6 @@ export default function StudentDashboard() {
                 <Link to={"/auth/ai-roadmap"} className="font-grotesk border border-black tracking-wide rounded-full transition-all active:translate-x-1 active:translate-y-1 active:shadow-none px-5 py-2.5 text-sm font-extrabold bg-yellow text-navy hover:bg-yellow-fixed border-3 border-navy shadow-pop">
                   + Generate Roadmap
                 </Link>
-
               </div>
             </div>
           </div>
@@ -99,26 +100,30 @@ export default function StudentDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <Card color="white" className="border-3">
               <div className="font-mono text-xs font-bold text-navy-muted uppercase">Active Roadmaps</div>
-              <div className="font-grotesk font-extrabold text-3xl text-navy mt-2">2 Paths</div>
-              <div className="text-xs text-rust font-bold mt-1">⚡ 65% Completed on Main Track</div>
+              <div className="font-grotesk font-extrabold text-3xl text-navy mt-2">
+                {loadingRoadmaps ? '...' : `${roadmaps.length} ${roadmaps.length === 1 ? 'Path' : 'Paths'}`}
+              </div>
+              <div className="text-xs text-rust font-bold mt-1">
+                {roadmaps.length > 0 ? `⚡ ${roadmaps[0].progress || 0}% on ${roadmaps[0].targetRole || 'Current Track'}` : '⚡ 0% Start your first path'}
+              </div>
             </Card>
 
             <Card color="white" className="border-3">
               <div className="font-mono text-xs font-bold text-navy-muted uppercase">Booked Sessions</div>
-              <div className="font-grotesk font-extrabold text-3xl text-navy mt-2">2 Upcoming</div>
-              <div className="text-xs text-teal font-bold mt-1">Next session tomorrow 5PM</div>
+              <div className="font-grotesk font-extrabold text-3xl text-navy mt-2">1 Active</div>
+              <div className="text-xs text-teal font-bold mt-1">Next session via Chat</div>
             </Card>
 
             <Card color="white" className="border-3">
               <div className="font-mono text-xs font-bold text-navy-muted uppercase">Credits Wallet</div>
-              <div className="font-grotesk font-extrabold text-3xl text-navy mt-2">120 pts</div>
-              <div className="text-xs text-rust font-bold mt-1">+100 Welcome credits added</div>
+              <div className="font-grotesk font-extrabold text-3xl text-navy mt-2">{user?.credits ?? 0} pts</div>
+              <div className="text-xs text-rust font-bold mt-1">Instant Top-up Available</div>
             </Card>
 
             <Card color="yellow" className="border-3">
               <div className="font-mono text-xs font-bold text-navy uppercase">Profile Mastery</div>
-              <div className="font-grotesk font-extrabold text-3xl text-navy mt-2">85%</div>
-              <div className="text-xs text-navy font-bold mt-1">Resume uploaded • College verified</div>
+              <div className="font-grotesk font-extrabold text-3xl text-navy mt-2">{user?.qualification ? '90%' : '75%'}</div>
+              <div className="text-xs text-navy font-bold mt-1">{user?.qualification ? 'College verified' : 'Complete details'}</div>
             </Card>
           </div>
 
@@ -133,53 +138,88 @@ export default function StudentDashboard() {
                     <h2 className="font-grotesk font-extrabold text-xl text-navy">My AI Career Roadmaps</h2>
                     <p className="font-body text-xs text-navy-muted">Step-by-step guidance powered by real Indian job market data</p>
                   </div>
-                  <a href="#" className="font-grotesk font-bold text-xs text-rust hover:underline">
+                  <Link to="/auth/profile/my-roadmaps" className="font-grotesk font-bold text-xs text-rust hover:underline">
                     View All Roadmaps →
-                  </a>
+                  </Link>
                 </div>
 
                 <div className="space-y-4">
-                  {recentRoadmaps.map((rm) => (
-                    <div key={rm.id} className="bg-parchment border-3 border-navy rounded-2xl p-5 shadow-pop-sm">
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <div className="flex items-center space-x-2">
-                            <span className="font-grotesk font-extrabold text-base text-navy">{rm.title}</span>
-                            <StatusBadge text={rm.badge} status="success" />
-                          </div>
-                          <p className="font-body text-xs text-navy-muted mt-1">
-                            Current Stage: <span className="font-bold text-navy">{rm.currentStep}</span>
-                          </p>
-                        </div>
-                        <span className="font-mono text-xs font-bold text-rust bg-rust-container px-2.5 py-1 rounded-full border border-navy">
-                          {rm.targetSalary}
-                        </span>
-                      </div>
-
-                      {/* Progress Bar */}
-                      <div className="mt-4">
-                        <div className="flex justify-between text-xs font-mono font-bold mb-1">
-                          <span>Overall Progress</span>
-                          <span>{rm.progress}%</span>
-                        </div>
-                        <div className="w-full bg-parchment-dim border-2 border-navy h-4 rounded-full overflow-hidden">
-                          <div
-                            className="bg-yellow h-full border-r-2 border-navy transition-all"
-                            style={{ width: `${rm.progress}%` }}
-                          ></div>
-                        </div>
-                      </div>
-
-                      <div className="mt-4 flex justify-end space-x-2">
-                        <Button variant="outline" size="sm">
-                          View Details
-                        </Button>
-                        <Button variant="primary" size="sm">
-                          Continue Phase 3 →
-                        </Button>
-                      </div>
+                  {loadingRoadmaps ? (
+                    <div className="text-center py-8 font-mono text-xs text-navy animate-pulse">
+                      Loading your AI Roadmaps...
                     </div>
-                  ))}
+                  ) : roadmaps.length === 0 ? (
+                    <div className="bg-parchment border-3 border-navy rounded-2xl p-6 text-center shadow-pop-sm">
+                      <p className="font-grotesk font-bold text-navy text-sm mb-2">No active roadmaps found yet!</p>
+                      <p className="font-body text-xs text-navy-muted mb-4">
+                        Generate your first AI-tailored career roadmap in seconds with 10 credits.
+                      </p>
+                      <Link to="/auth/ai-roadmap">
+                        <Button variant="primary" size="sm">
+                          + Generate Your First Roadmap
+                        </Button>
+                      </Link>
+                    </div>
+                  ) : (
+                    roadmaps.slice(0, 3).map((rm) => {
+                      const progressVal = rm.progress ?? (rm.phases?.length ? Math.round(((rm.completedPhases?.length || 0) / rm.phases.length) * 100) : 0);
+                      const currentStage = rm.phases?.[rm.completedPhases?.length || 0]?.phaseTitle || rm.phases?.[0]?.phaseTitle || 'Phase 1: Foundations';
+                      const salary = rm.marketInsights?.salaryRange || '₹8L - ₹15L / year';
+                      const badgeText = progressVal >= 100 ? 'COMPLETED' : 'ACTIVE TRACK';
+
+                      return (
+                        <div key={rm._id} className="bg-parchment border-3 border-navy rounded-2xl p-5 shadow-pop-sm">
+                          <div className="flex justify-between items-start mb-3">
+                            <div>
+                              <div className="flex items-center space-x-2">
+                                <span className="font-grotesk font-extrabold text-base text-navy">
+                                  {rm.targetRole || rm.title || 'AI Career Track'}
+                                </span>
+                                <StatusBadge text={badgeText} status="success" />
+                              </div>
+                              <p className="font-body text-xs text-navy-muted mt-1">
+                                Current Stage: <span className="font-bold text-navy">{currentStage}</span>
+                              </p>
+                            </div>
+                            <span className="font-mono text-xs font-bold text-rust bg-rust-container px-2.5 py-1 rounded-full border border-navy">
+                              {salary}
+                            </span>
+                          </div>
+
+                          {/* Progress Bar */}
+                          <div className="mt-4">
+                            <div className="flex justify-between text-xs font-mono font-bold mb-1">
+                              <span>Overall Progress</span>
+                              <span>{progressVal}%</span>
+                            </div>
+                            <div className="w-full bg-parchment-dim border-2 border-navy h-4 rounded-full overflow-hidden">
+                              <div
+                                className="bg-yellow h-full border-r-2 border-navy transition-all"
+                                style={{ width: `${progressVal}%` }}
+                              ></div>
+                            </div>
+                          </div>
+
+                          <div className="mt-4 flex justify-end space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => navigate('/auth/profile/my-roadmaps', { state: { selectedId: rm._id } })}
+                            >
+                              View Details
+                            </Button>
+                            <Button
+                              variant="primary"
+                              size="sm"
+                              onClick={() => navigate('/auth/profile/my-roadmaps', { state: { selectedId: rm._id } })}
+                            >
+                              Continue Phase →
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
               </div>
 
@@ -190,9 +230,9 @@ export default function StudentDashboard() {
                     <h2 className="font-grotesk font-extrabold text-xl text-navy">Upcoming 1-on-1 Sessions</h2>
                     <p className="font-body text-xs text-navy-muted">Live 1-on-1 mentorship with verified industry leaders</p>
                   </div>
-                  <a href="#" className="font-grotesk font-bold text-xs text-rust hover:underline">
+                  <Link to="/auth/counselors" className="font-grotesk font-bold text-xs text-rust hover:underline">
                     Browse Counselors →
-                  </a>
+                  </Link>
                 </div>
 
                 <div className="space-y-4">
@@ -214,7 +254,11 @@ export default function StudentDashboard() {
 
                       <div className="text-right">
                         <div className="font-mono text-xs font-bold text-navy mb-2">{session.date}</div>
-                        <Button variant="primary" size="sm">
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() => navigate('/auth/profile/chat')}
+                        >
                           Join Call
                         </Button>
                       </div>
@@ -232,14 +276,19 @@ export default function StudentDashboard() {
                   CREDIT BALANCE
                 </div>
                 <div className="font-grotesk font-extrabold text-4xl text-navy">
-                  120 <span className="text-base font-normal">pts</span>
+                  {user?.credits ?? 0} <span className="text-base font-normal">pts</span>
                 </div>
                 <p className="font-body text-xs text-navy mt-2">
                   1 Session = 50 Credits • 1 AI Roadmap = 10 Credits
                 </p>
 
                 <div className="mt-4 pt-4 border-t-2 border-navy/20">
-                  <Button variant="accent" size="md" className="w-full">
+                  <Button
+                    variant="accent"
+                    size="md"
+                    className="w-full"
+                    onClick={() => navigate('/auth/profile/my-credits')}
+                  >
                     Buy Top-Up Credit Pack →
                   </Button>
                 </div>
@@ -249,34 +298,34 @@ export default function StudentDashboard() {
               <div className="bg-parchment-card border-4 border-navy rounded-3xl p-6 shadow-pop">
                 <h3 className="font-grotesk font-extrabold text-lg text-navy mb-4">Quick Student Tools</h3>
                 <div className="space-y-3">
-                  <a
-                    href="#"
+                  <Link
+                    to="/auth/careers"
                     className="block bg-parchment border-2 border-navy p-3 rounded-xl hover:bg-yellow transition-all font-grotesk font-bold text-xs text-navy shadow-pop-sm flex items-center justify-between"
                   >
                     <span>🎯 Explore High Salary Tech Careers</span>
                     <span>→</span>
-                  </a>
-                  <a
-                    href="#"
+                  </Link>
+                  <Link
+                    to="/auth/ai-roadmap"
                     className="block bg-parchment border-2 border-navy p-3 rounded-xl hover:bg-yellow transition-all font-grotesk font-bold text-xs text-navy shadow-pop-sm flex items-center justify-between"
                   >
-                    <span>📄 AI Resume Reviewer</span>
+                    <span>📄 AI Career Roadmap Generator</span>
                     <span>→</span>
-                  </a>
-                  <a
-                    href="#"
+                  </Link>
+                  <Link
+                    to="/auth/profile/chat"
                     className="block bg-parchment border-2 border-navy p-3 rounded-xl hover:bg-yellow transition-all font-grotesk font-bold text-xs text-navy shadow-pop-sm flex items-center justify-between"
                   >
                     <span>💬 Practice Mock Interview Chat</span>
                     <span>→</span>
-                  </a>
-                  <a
-                    href="#"
+                  </Link>
+                  <Link
+                    to="/auth/profile/become-counselor"
                     className="block bg-parchment border-2 border-navy p-3 rounded-xl hover:bg-yellow transition-all font-grotesk font-bold text-xs text-navy shadow-pop-sm flex items-center justify-between"
                   >
-                    <span>🎓 Apply as Student Ambassador</span>
+                    <span>🎓 Apply as Student Ambassador / Counselor</span>
                     <span>→</span>
-                  </a>
+                  </Link>
                 </div>
               </div>
 
@@ -289,7 +338,12 @@ export default function StudentDashboard() {
                   "Specialized in helping Tier-2 & Tier-3 college students land top product tech roles."
                 </p>
                 <div className="mt-4">
-                  <Button variant="primary" size="sm" className="w-full">
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => navigate('/auth/counselors')}
+                  >
                     Book Session (50 Credits)
                   </Button>
                 </div>
