@@ -55,9 +55,10 @@ export default function StudentDashboard() {
   }, [user?.token, dispatch]);
 
   useEffect(() => {
-    if (user?.userType === "ADMIN") {
+    const role = (user?.userType || '').toUpperCase();
+    if (role === "ADMIN") {
       navigate("/auth/admin");
-    } else if (user?.userType === "COUNSELOR") {
+    } else if (role === "COUNSELOR") {
       navigate("/auth/counselor");
     }
   }, [user, navigate]);

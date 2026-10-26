@@ -2,6 +2,7 @@ import { LogOut } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { logOutUser } from "../features/auth/authSlice";
+import { closeSocket } from "../services/socketService";
 
 export default function Navbar({ activePage = 'dashboard' }) {
 
@@ -13,6 +14,7 @@ export default function Navbar({ activePage = 'dashboard' }) {
   const userType = user?.userType;
 
   const handleLogout = () => {
+    closeSocket();
     localStorage.removeItem('user');
     dispatch(logOutUser());
     navigate("/");

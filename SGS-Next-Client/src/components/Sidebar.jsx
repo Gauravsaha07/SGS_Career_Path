@@ -1,13 +1,25 @@
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
-export default function Sidebar({ activeTab = 'overview', role = 'student' }) {
+export default function Sidebar({ activeTab = 'overview', role }) {
+  const { user } = useSelector(state => state.auth);
+
+  // Normalize role case-insensitively from logged-in userType or prop
+  const effectiveRole = (user?.userType || role || 'student').toLowerCase();
+
   const studentNav = [
     { id: 'overview', label: 'My Dashboard', link: "/auth/profile", icon: '📊' },
     { id: 'roadmap', label: 'My Roadmaps', link: "/auth/profile/my-roadmaps", icon: '⚡' },
     { id: 'messages', label: 'Messages & Chat', link: "/auth/profile/chat", icon: '💬' },
     { id: 'credits', label: 'My Credits & Wallet', link: "/auth/profile/my-credits", icon: '🪙' },
     { id: 'become_counselor', label: 'Join as Counselor', link: "/auth/profile/become-counselor", icon: '🎓' },
-  ];
+  ].filter(item => {
+    // Hide 'Join as Counselor' for users who are already counselors or admins
+    if (item.id === 'become_counselor' && (effectiveRole === 'counselor' || effectiveRole === 'admin')) {
+      return false;
+    }
+    return true;
+  });
 
   const adminNav = [
     { id: 'admin_overview', label: 'System Overview', link: "/auth/admin", icon: '🛡️' },
@@ -25,7 +37,19 @@ export default function Sidebar({ activeTab = 'overview', role = 'student' }) {
     { id: 'counselor_earnings', label: 'Earnings & Credits', link: '/auth/counselor', icon: '💰' },
   ];
 
-  const items = role === 'admin' ? adminNav : role === 'counselor' ? counselorNav : studentNav;
+  const items = effectiveRole === 'admin'
+    ? adminNav
+    : effectiveRole === 'counselor'
+      ? counselorNav
+      : studentNav;
+
+  const isTabActive = (item) => {
+    if (activeTab === item.id) return true;
+    if (item.id === 'counselor_messages' && (activeTab === 'messages' || activeTab === 'chat')) return true;
+    if (item.id === 'counselor_earnings' && activeTab === 'credits') return true;
+    if (item.id === 'messages' && (activeTab === 'counselor_messages' || activeTab === 'chat')) return true;
+    return false;
+  };
 
   return (
     <aside className="hidden w-64 bg-parchment-card border-r-4 border-navy p-4 md:flex flex-col justify-between min-h-[calc(100vh-65px)]">
@@ -36,7 +60,7 @@ export default function Sidebar({ activeTab = 'overview', role = 'student' }) {
             <Link
               key={item.id}
               to={item.link}
-              className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg border-2 border-navy transition-all font-grotesk font-bold text-sm ${activeTab === item.id
+              className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg border-2 border-navy transition-all font-grotesk font-bold text-sm ${isTabActive(item)
                 ? 'bg-yellow text-navy shadow-pop-sm'
                 : 'bg-parchment text-navy hover:bg-parchment-dim'
                 }`}

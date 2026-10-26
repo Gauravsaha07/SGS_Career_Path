@@ -27,7 +27,7 @@ const forAdmin = async (req, res, next) => {
             token = req.headers.authorization.split(" ")[1]
             let decoded = jwt.verify(token, process.env.JWT_SECRET)
             let user = await User.findById(decoded.id).select("-password")
-            if (user.userType === "ADMIN") {
+            if ((user?.userType || '').toUpperCase() === "ADMIN") {
                 req.user = user
                 next()
             } else {

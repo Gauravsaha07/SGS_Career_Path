@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { io } from 'socket.io-client';
 import { toast } from 'react-hot-toast';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
@@ -9,6 +8,7 @@ import ChatBubble from '../components/ChatBubble';
 import Button from '../components/Button';
 import StatusBadge from '../components/StatusBadge';
 import messageService from '../services/messageService';
+import { getSocket } from '../services/socketService';
 
 export default function ChatPage() {
   const { user } = useSelector((state) => state.auth);
@@ -48,7 +48,6 @@ export default function ChatPage() {
         if (!isMounted) return;
         setConversations(data);
         if (data.length > 0) {
-          // If targetUserId was passed, select that partner, otherwise select first conversation
           const matching = targetUserId ? data.find((c) => c.user?._id === targetUserId) : null;
           setActivePartner(matching ? matching.user : data[0].user);
         }
@@ -62,35 +61,32 @@ export default function ChatPage() {
     };
   }, [user?.token, targetUserId]);
 
-  // Initialize Socket.io
+  // Connect & manage Socket.io singleton lifecycle
   useEffect(() => {
     if (!user?.token) return;
 
-    const socket = io("http://localhost:5511", {
-      auth: { token: user.token },
-      transports: ["websocket", "polling"]
-    });
+    const socket = getSocket(user.token);
+    if (!socket) return;
     socketRef.current = socket;
 
-    socket.on("user_online", ({ userId }) => {
+    const handleUserOnline = ({ userId }) => {
       setOnlineUserIds((prev) => new Set([...prev, userId]));
-    });
+    };
 
-    socket.on("user_offline", ({ userId }) => {
+    const handleUserOffline = ({ userId }) => {
       setOnlineUserIds((prev) => {
         const next = new Set(prev);
         next.delete(userId);
         return next;
       });
-    });
+    };
 
-    socket.on("receive_message", (incoming) => {
+    const handleReceiveMessage = (incoming) => {
       const incomingPartnerId = incoming.sender === user._id ? incoming.receiver : incoming.sender;
 
       setActivePartner((currentPartner) => {
         if (currentPartner && currentPartner._id === incomingPartnerId) {
           setMessages((prev) => {
-            // Check if duplicate
             if (prev.some((m) => m._id === incoming._id)) return prev;
             return [...prev, incoming];
           });
@@ -98,7 +94,6 @@ export default function ChatPage() {
         return currentPartner;
       });
 
-      // Update conversations preview
       setConversations((prev) =>
         prev.map((c) => {
           if (c.user?._id === incomingPartnerId) {
@@ -112,14 +107,22 @@ export default function ChatPage() {
           return c;
         })
       );
-    });
+    };
 
-    socket.on("message_error", (err) => {
+    const handleMessageError = (err) => {
       toast.error(err?.error || "Error sending message");
-    });
+    };
+
+    socket.on("user_online", handleUserOnline);
+    socket.on("user_offline", handleUserOffline);
+    socket.on("receive_message", handleReceiveMessage);
+    socket.on("message_error", handleMessageError);
 
     return () => {
-      socket.disconnect();
+      socket.off("user_online", handleUserOnline);
+      socket.off("user_offline", handleUserOffline);
+      socket.off("receive_message", handleReceiveMessage);
+      socket.off("message_error", handleMessageError);
     };
   }, [user?._id, user?.token]);
 
@@ -127,11 +130,23 @@ export default function ChatPage() {
   useEffect(() => {
     if (!activePartner?._id || !user?._id || !user?.token) return;
 
-    if (socketRef.current) {
-      socketRef.current.emit("join_room", {
-        senderId: user._id,
-        receiverId: activePartner._id
-      });
+    const socket = socketRef.current;
+    if (socket) {
+      if (socket.connected) {
+        socket.emit("join_room", {
+          senderId: user._id,
+          receiverId: activePartner._id
+        });
+      } else {
+        const onConnect = () => {
+          socket.emit("join_room", {
+            senderId: user._id,
+            receiverId: activePartner._id
+          });
+          socket.off("connect", onConnect);
+        };
+        socket.on("connect", onConnect);
+      }
     }
 
     setLoadingHistory(true);
@@ -148,9 +163,15 @@ export default function ChatPage() {
 
   const handleSendMessage = (e) => {
     e.preventDefault();
-    if (!newMessage.trim() || !activePartner?._id || !socketRef.current) return;
+    if (!newMessage.trim() || !activePartner?._id) return;
 
-    socketRef.current.emit("send_message", {
+    const socket = socketRef.current;
+    if (!socket || !socket.connected) {
+      toast.error("Chat is connecting, please try again in a moment.");
+      return;
+    }
+
+    socket.emit("send_message", {
       senderId: user._id,
       receiverId: activePartner._id,
       content: newMessage.trim()
@@ -163,8 +184,9 @@ export default function ChatPage() {
     const file = e.target.files?.[0];
     if (file) {
       toast.info(`Attachment "${file.name}" selected. Sharing link via chat!`);
-      if (socketRef.current && activePartner?._id) {
-        socketRef.current.emit("send_message", {
+      const socket = socketRef.current;
+      if (socket && socket.connected && activePartner?._id) {
+        socket.emit("send_message", {
           senderId: user._id,
           receiverId: activePartner._id,
           content: `📎 Shared Document: ${file.name} (uploaded for mentorship session)`
@@ -195,13 +217,20 @@ export default function ChatPage() {
   };
 
   const isPartnerOnline = activePartner?._id && onlineUserIds.has(activePartner._id);
+  const effectiveRole = (user?.userType || 'student').toLowerCase();
+  const partnerRoleUpper = (activePartner?.userType || '').toUpperCase();
+  const partnerRoleLabel = partnerRoleUpper === 'COUNSELOR'
+    ? 'Verified Counselor'
+    : partnerRoleUpper === 'ADMIN'
+      ? 'CareerBridge Admin'
+      : 'Student Mentee';
 
   return (
     <div className="min-h-screen bg-parchment flex flex-col">
       <Navbar activePage="messages" />
 
       <div className="flex-1 flex">
-        <Sidebar activeTab="messages" role={user?.userType || 'student'} />
+        <Sidebar activeTab="counselor_messages" role={effectiveRole} />
 
         <main className="flex-1 p-8 bg-grid-pattern overflow-y-auto flex">
           <div className="w-full bg-parchment-card border-4 border-navy rounded-3xl shadow-pop flex flex-col lg:flex-row overflow-hidden min-h-[650px]">
@@ -226,7 +255,8 @@ export default function ChatPage() {
                     filteredConversations.map((c) => {
                       const isActive = activePartner?._id === c.user?._id;
                       const partnerName = c.user?.name || 'Career Mentor';
-                      const partnerRole = c.user?.qualification || (c.user?.userType === 'counselor' ? 'Verified Counselor' : 'Student Peer');
+                      const isCn = (c.user?.userType || '').toUpperCase() === 'COUNSELOR';
+                      const partnerRole = c.user?.qualification || (isCn ? 'Verified Counselor' : 'Student Peer');
                       const avatarInitials = getInitials(partnerName);
 
                       return (
@@ -276,22 +306,27 @@ export default function ChatPage() {
                       {activePartner?.name || 'Select a conversation'}
                     </h2>
                     <p className="font-mono text-[10px] text-navy-muted">
-                      {isPartnerOnline ? '🟢 Online' : '⚪ Active Mentor'} • {activePartner?.qualification || (activePartner?.userType === 'counselor' ? 'Verified Counselor' : 'CareerBridge Member')}
+                      {isPartnerOnline ? '🟢 Online' : '⚪ Offline'} • {activePartner?.qualification || partnerRoleLabel}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <StatusBadge text="ACTIVE MENTORSHIP" status="success" />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      toast.info("Opening counselor directory for extended session booking...");
-                      navigate('/auth/counselors');
-                    }}
-                  >
-                    Book Extension
-                  </Button>
+                  <StatusBadge
+                    text={partnerRoleUpper === 'COUNSELOR' ? "ACTIVE MENTORSHIP" : "STUDENT SESSION"}
+                    status="success"
+                  />
+                  {effectiveRole === 'student' && partnerRoleUpper === 'COUNSELOR' && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        toast.info("Opening counselor directory for extended session booking...");
+                        navigate('/auth/counselors');
+                      }}
+                    >
+                      Book Extension
+                    </Button>
+                  )}
                 </div>
               </div>
 
