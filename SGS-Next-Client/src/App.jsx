@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 
-// Import all 20 page screens for workshop previewing
+// Import all page screens
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -30,9 +30,7 @@ import NotFoundPage from './pages/NotFoundPage';
 export default function App() {
 
   // Create a client
-  const queryClient = new QueryClient()
-
-
+  const queryClient = new QueryClient();
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -56,7 +54,9 @@ export default function App() {
             <Route path='profile/chat' element={<ChatPage />} />
             <Route path='profile/my-roadmaps' element={<RoadmapResult />} />
             <Route path='careers' element={<CareerExplorer />} />
+            <Route path='careers/:id' element={<CareerDetail />} />
             <Route path='counselors' element={<CounselorList />} />
+            <Route path='counselors/:id' element={<CounselorProfile />} />
             <Route path='ai-roadmap' element={<RoadmapGenerator />} />
           </Route>
         </Routes>
