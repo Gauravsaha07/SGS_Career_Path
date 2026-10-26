@@ -38,6 +38,22 @@ export default function RoadmapGenerator() {
 
   const { interest, skill_level, budget, learning_mode, additional_info } = formData;
 
+  const [stepIdx, setStepIdx] = useState(0);
+
+  useEffect(() => {
+    if (!isPending) return;
+    const steps = [
+      "Analyzing your profile & background...",
+      "Synthesizing Tier-1 & Indian industry requirements...",
+      "Drafting Phase 1 & 2 actionable foundations...",
+      "Finalizing customized 4-phase placement roadmap..."
+    ];
+    const timer = setInterval(() => {
+      setStepIdx((prev) => (prev + 1) % steps.length);
+    }, 1500);
+    return () => clearInterval(timer);
+  }, [isPending]);
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -47,8 +63,13 @@ export default function RoadmapGenerator() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (isPending) return;
     if (!interest.trim()) {
       toast.error("Please enter your career interest!");
+      return;
+    }
+    if ((user?.credits || 0) < 1) {
+      toast.error("Insufficient credits. Please request credits to generate a roadmap.");
       return;
     }
     mutate({
@@ -74,8 +95,14 @@ export default function RoadmapGenerator() {
   }, [isError, error, data, isSuccess, user, navigate, dispatch]);
 
   if (isPending) {
+    const steps = [
+      "Analyzing your profile & background...",
+      "Synthesizing Tier-1 & Indian industry requirements...",
+      "Drafting Phase 1 & 2 actionable foundations...",
+      "Finalizing customized 4-phase placement roadmap..."
+    ];
     return (
-      <LoadingScreen loadingMessage='Generating Roadmap....' />
+      <LoadingScreen loadingMessage={steps[stepIdx]} />
     );
   }
 
@@ -196,8 +223,8 @@ export default function RoadmapGenerator() {
                   <span>Cost: 1 Credit (Your Balance: {user?.credits || 0} Credits)</span>
                 </div>
 
-                <Button type="submit" variant="accent" size="lg">
-                  ⚡ Generate 4-Phase Roadmap →
+                <Button type="submit" variant="accent" size="lg" disabled={isPending || (user?.credits || 0) < 1}>
+                  {isPending ? "Generating..." : "⚡ Generate 4-Phase Roadmap →"}
                 </Button>
               </div>
             </form>

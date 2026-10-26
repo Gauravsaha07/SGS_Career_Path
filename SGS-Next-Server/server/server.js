@@ -3,6 +3,7 @@ import dotenv from "dotenv"
 dotenv.config()
 import colors from "colors"
 import http from "http"
+import compression from "compression"
 import { Server } from "socket.io";
 import socketAuthMiddleware from "./socket/socketAuth.js";
 import { chatHandler } from "./socket/chatHandler.js"
@@ -22,6 +23,7 @@ import messageRoutes from "./routes/messageRoutes.js"
 const PORT = process.env.PORT || 5000
 
 const app = express()
+app.use(compression())
 const server = http.createServer(app)
 
 // DB CONNECTION

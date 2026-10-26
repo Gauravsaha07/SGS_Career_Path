@@ -29,8 +29,16 @@ import NotFoundPage from './pages/NotFoundPage';
 
 export default function App() {
 
-  // Create a client
-  const queryClient = new QueryClient();
+  // Create a client with optimized caching & no duplicate window focus refetches
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 1000 * 60 * 5,
+        refetchOnWindowFocus: false,
+        retry: 1
+      }
+    }
+  });
 
   return (
     <QueryClientProvider client={queryClient}>

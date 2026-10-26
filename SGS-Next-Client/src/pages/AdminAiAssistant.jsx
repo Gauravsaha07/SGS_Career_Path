@@ -28,15 +28,17 @@ export default function AdminAiAssistant() {
   const [text, setText] = useState("")
 
   const handleSubmit = (e) => {
-    e.preventDefault()
+    e.preventDefault();
+    if (!text.trim() || isPending) return;
+    const submittedText = text.trim();
     mutate({
       token: user.token,
-      text: text
-    })
-    dispatch(setMessage({ id: crypto.randomUUID(), sender: 'Admin', time: new Date(Date.now()).toLocaleTimeString('EN-IN'), message: text, isSelf: true }))
+      text: submittedText
+    });
+    dispatch(setMessage({ id: crypto.randomUUID(), sender: 'Admin', time: new Date(Date.now()).toLocaleTimeString('EN-IN'), message: submittedText, isSelf: true }));
 
-    setText("")
-  }
+    setText("");
+  };
 
 
   useEffect(() => {
@@ -79,6 +81,15 @@ export default function AdminAiAssistant() {
             {messages?.map((msg) => (
               <ChatBubble key={msg.id} sender={msg.sender} time={msg.time} message={msg.message} isSelf={msg.isSelf} />
             ))}
+            {isPending && (
+              <ChatBubble
+                key="thinking-bubble"
+                sender="A.I"
+                time="Analyzing..."
+                message="Analyzing platform data and formulating recommendations..."
+                isSelf={false}
+              />
+            )}
           </div>
 
           {/* Chat Input Bar */}
@@ -89,10 +100,11 @@ export default function AdminAiAssistant() {
                 type="text"
                 value={text}
                 placeholder="Type your message here..."
-                className="flex-1 bg-white border-3 border-navy rounded-xl px-4 py-2.5 font-body text-sm text-navy shadow-pop-sm focus:outline-none"
+                disabled={isPending}
+                className="flex-1 bg-white border-3 border-navy rounded-xl px-4 py-2.5 font-body text-sm text-navy shadow-pop-sm focus:outline-none disabled:opacity-60"
               />
-              <Button type='submit' variant="primary" size="md">
-                Send Message ➔
+              <Button type='submit' variant="primary" size="md" disabled={isPending || !text.trim()}>
+                {isPending ? "Thinking..." : "Send Message ➔"}
               </Button>
             </form>
           </div>
