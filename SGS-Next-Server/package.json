@@ -9,6 +9,7 @@
   "scripts": {
     "server": "node server/server.js",
     "dev": "node --watch server/server.js",
+    "seed": "node seed.js",
     "seed_users": "node users.js",
     "seed_categories": "node categories.js"
   },

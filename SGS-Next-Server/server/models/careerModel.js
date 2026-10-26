@@ -24,12 +24,23 @@ const careerSchema = new mongoose.Schema({
     },
     salary: {
         type: String,
-        required: [true, "Please Enter Career Title!"]
+        required: [true, "Please Enter Salary!"]
+    },
+    skills: {
+        type: [String],
+        default: []
+    },
+    openings: {
+        type: String,
+        default: "Openings Available"
+    },
+    badge: {
+        type: String,
+        default: "POPULAR"
     }
 }, {
     timestamps: true
 })
-
 
 const Career = mongoose.model("Career", careerSchema)
 
