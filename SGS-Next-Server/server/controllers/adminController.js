@@ -98,42 +98,79 @@ const getCareers = async (req, res) => {
 
 
 const getCounselors = async (req, res) => {
-    const counselors = await Counselor.find().populate('category').populate('user')
+    const counselors = await Counselor.find().populate('category').populate('user').lean();
 
     if (!counselors) {
-        res.status(404)
-        throw new Error("Counselors Not Found!")
+        res.status(404);
+        throw new Error("Counselors Not Found!");
     }
 
+    // Provide safe fallback objects if linked user or category is null/deleted
+    const sanitized = counselors.map(c => ({
+        ...c,
+        user: c.user || {
+            _id: null,
+            name: c.name || "Applicant (User Deleted)",
+            email: "deleted@careerbridge.in",
+            phone: "N/A",
+            location: "Unknown Location",
+            qualification: "N/A",
+            credits: 0
+        },
+        category: c.category || {
+            _id: null,
+            title: "General / Uncategorized"
+        }
+    }));
 
-    res.status(200).json(counselors)
-
-}
+    res.status(200).json(sanitized);
+};
 
 
 const updateCounselor = async (req, res) => {
 
-    const counselor = await Counselor.findById(req.params.cnid)
+    const counselor = await Counselor.findById(req.params.cnid);
 
     if (!counselor) {
-        res.status(404)
-        throw new Error('Counselor Not Found')
+        res.status(404);
+        throw new Error('Counselor Not Found');
     }
 
-    const updatedCounselor = await Counselor.findByIdAndUpdate(counselor._id, req.body, { new: true }).populate('user').populate('category')
+    const updatedCounselor = await Counselor.findByIdAndUpdate(
+        counselor._id,
+        req.body,
+        { returnDocument: 'after' }
+    ).populate('user').populate('category').lean();
 
-    if (req.body.status === "accepted") {
-        const updatedUser = await User.findByIdAndUpdate(counselor.user, { userType: "COUNSELOR" }, { new: true })
+    if (req.body.status === "accepted" && counselor.user) {
+        await User.findByIdAndUpdate(counselor.user, { userType: "COUNSELOR" }, { returnDocument: 'after' });
     }
 
     if (!updatedCounselor) {
-        res.status(409)
-        throw new Error("Counselor not updated")
+        res.status(409);
+        throw new Error("Counselor not updated");
     }
 
-    res.status(200).json(updatedCounselor)
+    const sanitized = {
+        ...updatedCounselor,
+        user: updatedCounselor.user || {
+            _id: null,
+            name: updatedCounselor.name || "Applicant (User Deleted)",
+            email: "deleted@careerbridge.in",
+            phone: "N/A",
+            location: "Unknown Location",
+            qualification: "N/A",
+            credits: 0
+        },
+        category: updatedCounselor.category || {
+            _id: null,
+            title: "General / Uncategorized"
+        }
+    };
 
-}
+    res.status(200).json(sanitized);
+
+};
 
 const getAllCreditRequests = async (req, res) => {
 

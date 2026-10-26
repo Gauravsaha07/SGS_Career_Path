@@ -69,9 +69,17 @@ export default function AdminCounselorApprovals() {
           </div>
 
           <div className="space-y-6 max-w-4xl">
-            {pendingRequests?.map((app) => (
-              <ApprovalCard key={app._id} app={app} />
-            ))}
+            {pendingRequests && pendingRequests.length > 0 ? (
+              pendingRequests.map((app) => (
+                <ApprovalCard key={app._id} app={app} />
+              ))
+            ) : (
+              <div className="bg-parchment-card border-4 border-navy rounded-3xl p-12 text-center shadow-pop">
+                <div className="text-4xl mb-3">✅</div>
+                <h3 className="font-grotesk font-extrabold text-xl text-navy">No Pending Counselor Applications</h3>
+                <p className="font-body text-xs text-navy-muted mt-2">All counselor onboarding requests have been reviewed.</p>
+              </div>
+            )}
           </div>
         </main>
       </div>
