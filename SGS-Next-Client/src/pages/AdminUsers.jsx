@@ -87,8 +87,8 @@ export default function AdminUsers() {
                         <div className="text-[10px] text-navy-muted">{u.email}</div>
                       </td>
                       <td className="p-3 font-bold text-navy">{u.userType}</td>
-                      <td className="p-3 font-bold text-rust">{u.credits}</td>
-                      <td className="p-3 text-navy-muted">{new Date(u.createdAt).toLocaleDateString('en-IN')}</td>
+                      <td className="p-3 font-bold text-rust">{u.credits ?? 0}</td>
+                      <td className="p-3 text-navy-muted">{u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-IN') : 'N/A'}</td>
                       <td className="p-3">
                         <StatusBadge text={u.isActive ? "Active" : "Suspended"} status="success" />
                       </td>
