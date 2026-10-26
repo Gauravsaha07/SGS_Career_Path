@@ -8,6 +8,7 @@ import Counselor from "../models/counselorModel.js";
 export const getConversations = async (req, res) => {
     try {
         const currentUserId = req.user.id;
+        const currentUserType = (req.user.userType || '').toUpperCase();
 
         // Find all messages involving the current user
         const messages = await Message.find({
@@ -45,9 +46,26 @@ export const getConversations = async (req, res) => {
             };
         });
 
+        // For counselors: ensure any students who booked a session with this counselor appear in their conversations list
+        if (currentUserType === "COUNSELOR") {
+            const counselorDoc = await Counselor.findOne({ user: currentUserId }).populate("bookings.student", "name email profilePic userType qualification location");
+            if (counselorDoc && counselorDoc.bookings) {
+                for (const b of counselorDoc.bookings) {
+                    if (b.student && b.student._id && !conversationList.some(c => c.user?._id?.toString() === b.student._id.toString())) {
+                        conversationList.push({
+                            user: b.student,
+                            lastMessage: `Session booked for ${b.slot || "upcoming slot"}. Ready to connect!`,
+                            lastMessageTime: b.createdAt || new Date(),
+                            unreadCount: 0
+                        });
+                    }
+                }
+            }
+        }
+
         // If targetUserId passed in query and not yet in conversationList, prepend them
         const targetUserId = req.query.targetUserId;
-        if (targetUserId && targetUserId !== currentUserId && !partnerIds.includes(targetUserId)) {
+        if (targetUserId && targetUserId !== currentUserId && !conversationList.some(c => c.user?._id?.toString() === targetUserId)) {
             const targetUser = await User.findById(targetUserId).select("name email profilePic userType qualification location");
             if (targetUser) {
                 conversationList.unshift({
@@ -56,21 +74,6 @@ export const getConversations = async (req, res) => {
                     lastMessageTime: new Date(),
                     unreadCount: 0
                 });
-            }
-        }
-
-        // If user has fewer than 2 conversations, append verified active counselors so they can easily chat
-        if (conversationList.length < 2) {
-            const activeCounselors = await Counselor.find({ status: "accepted" }).populate("user", "name email profilePic userType qualification location");
-            for (const cn of activeCounselors) {
-                if (cn.user && cn.user._id.toString() !== currentUserId && !conversationList.some(c => c.user?._id?.toString() === cn.user._id.toString())) {
-                    conversationList.push({
-                        user: cn.user,
-                        lastMessage: "Start a mentorship conversation...",
-                        lastMessageTime: cn.createdAt,
-                        unreadCount: 0
-                    });
-                }
             }
         }
 

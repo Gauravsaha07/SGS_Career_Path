@@ -5,28 +5,34 @@ import Card from '../components/Card';
 import Button from '../components/Button';
 import StatusBadge from '../components/StatusBadge';
 import { useSelector, useDispatch } from 'react-redux';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import authService from '../services/authService';
+import counselorService from '../services/counselorService';
 import { setUser } from '../features/auth/authSlice';
+import LoadingScreen from '../components/LoadingScreen';
 
 export default function CounselorDashboard() {
   const { user } = useSelector(state => state.auth);
   const dispatch = useDispatch();
+  const queryClient = useQueryClient();
 
   const [showSlotsModal, setShowSlotsModal] = useState(false);
   const [showPayoutModal, setShowPayoutModal] = useState(false);
-  const [availableSlots, setAvailableSlots] = useState([
-    { day: 'Friday', time: '05:00 PM IST', active: true },
-    { day: 'Friday', time: '07:30 PM IST', active: true },
-    { day: 'Saturday', time: '11:00 AM IST', active: true },
-    { day: 'Saturday', time: '04:00 PM IST', active: false },
-    { day: 'Sunday', time: '06:00 PM IST', active: true },
-  ]);
+  const [availableSlots, setAvailableSlots] = useState([]);
 
-  const [pendingRequests, setPendingRequests] = useState([
-    { id: 'req-1', student: 'Aarav Sharma', college: 'IIT Delhi (B.Tech CSE)', topic: 'System Design Mock Interview', time: 'Tomorrow, 5:00 PM IST', fee: '50 Credits', status: 'Pending' },
-    { id: 'req-2', student: 'Priya Patel', college: 'NSUT Delhi (BCA)', topic: 'Resume & Portfolio Feedback', time: 'Sat, 11:00 AM IST', fee: '50 Credits', status: 'Pending' },
-  ]);
+  // Fetch real counselor workspace
+  const { data: workspace, isLoading } = useQuery({
+    queryKey: ['counselorWorkspace', user?._id],
+    queryFn: () => counselorService.fetchMyWorkspace(user.token),
+    enabled: !!user?.token
+  });
+
+  useEffect(() => {
+    if (workspace?.availableSlots) {
+      setAvailableSlots(workspace.availableSlots);
+    }
+  }, [workspace?.availableSlots]);
 
   // Sync latest counselor credits and user data
   useEffect(() => {
@@ -41,16 +47,17 @@ export default function CounselorDashboard() {
     }
   }, [user?.token, dispatch]);
 
-  const handleAcceptBooking = (reqId) => {
-    setPendingRequests((prev) =>
-      prev.map((r) => (r.id === reqId ? { ...r, status: 'Confirmed' } : r))
-    );
-    toast.success("Booking confirmed! Student notified via chat.");
-  };
-
-  const handleReschedule = (reqId) => {
-    toast.info("Reschedule proposal sent to student via chat.");
-  };
+  const updateSlotsMutation = useMutation({
+    mutationFn: (newSlots) => counselorService.updateSlots(newSlots, user.token),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['counselorWorkspace'] });
+      setShowSlotsModal(false);
+      toast.success("Counseling availability slots updated successfully!");
+    },
+    onError: (err) => {
+      toast.error(err?.response?.data?.message || err?.message || "Failed to update slots");
+    }
+  });
 
   const toggleSlot = (index) => {
     setAvailableSlots((prev) =>
@@ -59,9 +66,26 @@ export default function CounselorDashboard() {
   };
 
   const handleSaveSlots = () => {
-    setShowSlotsModal(false);
-    toast.success("Counseling availability slots updated successfully!");
+    updateSlotsMutation.mutate(availableSlots);
   };
+
+  const handleAcceptBooking = (bookingId) => {
+    toast.success("Booking session confirmed! Mentee notified via chat.");
+  };
+
+  const handleReschedule = (bookingId) => {
+    toast.info("Reschedule proposal sent to student via chat.");
+  };
+
+  if (isLoading) {
+    return <LoadingScreen loadingMessage="Loading Counselor Workspace..." />;
+  }
+
+  const bookingsList = workspace?.bookings || [];
+  const totalCalls = workspace?.totalCalls || bookingsList.length;
+  const avgRating = workspace?.avgRating || "5.0";
+  const creditsEarned = workspace?.creditsEarned ?? user?.credits ?? 0;
+  const earningsINR = workspace?.earningsINR ?? (creditsEarned * 10);
 
   return (
     <div className="min-h-screen bg-parchment flex flex-col">
@@ -109,25 +133,27 @@ export default function CounselorDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <Card color="white">
               <div className="font-mono text-xs font-bold text-navy-muted uppercase">Sessions Completed</div>
-              <div className="font-grotesk font-extrabold text-3xl text-navy mt-2">184 Calls</div>
-              <div className="text-xs text-rust font-bold mt-1">★ 4.9 Rating Average</div>
+              <div className="font-grotesk font-extrabold text-3xl text-navy mt-2">{totalCalls} Calls</div>
+              <div className="text-xs text-rust font-bold mt-1">★ {avgRating} Rating Average</div>
             </Card>
 
             <Card color="white">
               <div className="font-mono text-xs font-bold text-navy-muted uppercase">Total Earnings</div>
-              <div className="font-grotesk font-extrabold text-3xl text-navy mt-2">₹1,42,000</div>
+              <div className="font-grotesk font-extrabold text-3xl text-navy mt-2">₹{earningsINR.toLocaleString('en-IN')}</div>
               <div className="text-xs text-teal font-bold mt-1">Direct Bank Payouts</div>
             </Card>
 
             <Card color="white">
               <div className="font-mono text-xs font-bold text-navy-muted uppercase">Credits Earned</div>
-              <div className="font-grotesk font-extrabold text-3xl text-navy mt-2">{user?.credits ?? 0} pts</div>
+              <div className="font-grotesk font-extrabold text-3xl text-navy mt-2">{creditsEarned} pts</div>
               <div className="text-xs text-rust font-bold mt-1">50 Credits / Session Rate</div>
             </Card>
 
             <Card color="yellow">
               <div className="font-mono text-xs font-bold text-navy uppercase">Profile Status</div>
-              <div className="font-grotesk font-extrabold text-3xl text-navy mt-2">VERIFIED</div>
+              <div className="font-grotesk font-extrabold text-3xl text-navy mt-2">
+                {workspace?.status ? workspace.status.toUpperCase() : "VERIFIED"}
+              </div>
               <div className="text-xs text-navy font-bold mt-1">{user?.qualification || 'Senior Industry Mentor'}</div>
             </Card>
           </div>
@@ -136,38 +162,54 @@ export default function CounselorDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
               <div className="bg-parchment-card border-4 border-navy rounded-3xl p-6 shadow-pop">
-                <h2 className="font-grotesk font-extrabold text-xl text-navy mb-4">Pending Student Requests</h2>
+                <h2 className="font-grotesk font-extrabold text-xl text-navy mb-4">Student Session Bookings</h2>
                 <div className="space-y-4">
-                  {pendingRequests.map((req) => (
-                    <div key={req.id} className="bg-parchment border-3 border-navy p-4 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-3 shadow-pop-sm">
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <span className="font-grotesk font-extrabold text-base text-navy">{req.student}</span>
-                          <StatusBadge text={req.status === 'Confirmed' ? 'CONFIRMED' : req.fee} status={req.status === 'Confirmed' ? 'success' : 'info'} />
-                        </div>
-                        <p className="font-mono text-xs text-navy-muted">{req.college}</p>
-                        <p className="font-body text-xs font-bold text-rust mt-1">📌 {req.topic} • {req.time}</p>
-                      </div>
-
-                      <div className="flex space-x-2 w-full md:w-auto">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleReschedule(req.id)}
-                        >
-                          Reschedule
-                        </Button>
-                        <Button
-                          variant="primary"
-                          size="sm"
-                          onClick={() => handleAcceptBooking(req.id)}
-                          disabled={req.status === 'Confirmed'}
-                        >
-                          {req.status === 'Confirmed' ? 'Accepted ✓' : 'Accept Booking ✓'}
-                        </Button>
-                      </div>
+                  {bookingsList.length === 0 ? (
+                    <div className="bg-parchment border-2 border-dashed border-navy/40 p-8 rounded-2xl text-center">
+                      <span className="text-3xl mb-2 block">📅</span>
+                      <p className="font-grotesk font-bold text-sm text-navy">No pending student session requests</p>
+                      <p className="font-body text-xs text-navy-muted mt-1">
+                        When students book 1-on-1 calls from your profile, their requests will appear here.
+                      </p>
                     </div>
-                  ))}
+                  ) : (
+                    bookingsList.map((req, idx) => {
+                      const studentName = req.studentName || req.student?.name || "Student Mentee";
+                      const studentQual = req.student?.qualification || req.studentEmail || "Student";
+                      const isConfirmed = req.status === 'confirmed';
+
+                      return (
+                        <div key={req._id || idx} className="bg-parchment border-3 border-navy p-4 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-3 shadow-pop-sm">
+                          <div>
+                            <div className="flex items-center space-x-2">
+                              <span className="font-grotesk font-extrabold text-base text-navy">{studentName}</span>
+                              <StatusBadge text={isConfirmed ? 'CONFIRMED' : `${req.fee || 50} Credits`} status={isConfirmed ? 'success' : 'info'} />
+                            </div>
+                            <p className="font-mono text-xs text-navy-muted">{studentQual}</p>
+                            <p className="font-body text-xs font-bold text-rust mt-1">📌 {req.topic} • {req.slot}</p>
+                          </div>
+
+                          <div className="flex space-x-2 w-full md:w-auto">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleReschedule(req._id)}
+                            >
+                              Reschedule
+                            </Button>
+                            <Button
+                              variant="primary"
+                              size="sm"
+                              onClick={() => handleAcceptBooking(req._id)}
+                              disabled={isConfirmed}
+                            >
+                              {isConfirmed ? 'Accepted ✓' : 'Accept Booking ✓'}
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
               </div>
             </div>
@@ -187,7 +229,7 @@ export default function CounselorDashboard() {
                   </div>
                   <div className="flex justify-between items-center bg-parchment p-3 rounded-xl border border-navy">
                     <span>Payout Bank Account</span>
-                    <span className="font-bold text-navy font-mono">HDFC Bank ****4920</span>
+                    <span className="font-bold text-navy font-mono">Verified Indian Bank A/C</span>
                   </div>
                 </div>
               </div>
@@ -215,7 +257,7 @@ export default function CounselorDashboard() {
                   </span>
                   <input
                     type="checkbox"
-                    checked={slot.active}
+                    checked={slot.active !== false}
                     onChange={() => toggleSlot(idx)}
                     className="w-4 h-4 accent-navy"
                   />
@@ -226,8 +268,13 @@ export default function CounselorDashboard() {
               <Button variant="outline" size="sm" onClick={() => setShowSlotsModal(false)}>
                 Cancel
               </Button>
-              <Button variant="primary" size="sm" onClick={handleSaveSlots}>
-                Save Slots
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleSaveSlots}
+                disabled={updateSlotsMutation.isPending}
+              >
+                {updateSlotsMutation.isPending ? "Saving..." : "Save Slots"}
               </Button>
             </div>
           </div>
@@ -253,17 +300,10 @@ export default function CounselorDashboard() {
             <div className="space-y-3 font-mono text-xs">
               <div className="p-3 bg-parchment border-2 border-navy rounded-xl flex justify-between items-center">
                 <div>
-                  <div className="font-bold text-navy">₹25,000 (500 Credits)</div>
-                  <div className="text-[10px] text-navy-muted">Oct 15, 2026 • Ref #PAY-99214</div>
+                  <div className="font-bold text-navy">₹{earningsINR.toLocaleString('en-IN')} ({creditsEarned} Credits)</div>
+                  <div className="text-[10px] text-navy-muted">Current Cycle • Auto-Payout Pending</div>
                 </div>
-                <StatusBadge text="PAID" status="success" />
-              </div>
-              <div className="p-3 bg-parchment border-2 border-navy rounded-xl flex justify-between items-center">
-                <div>
-                  <div className="font-bold text-navy">₹35,000 (700 Credits)</div>
-                  <div className="text-[10px] text-navy-muted">Oct 01, 2026 • Ref #PAY-88401</div>
-                </div>
-                <StatusBadge text="PAID" status="success" />
+                <StatusBadge text="ACTIVE" status="success" />
               </div>
             </div>
             <div className="flex justify-end pt-2">

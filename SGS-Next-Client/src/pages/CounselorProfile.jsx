@@ -31,14 +31,35 @@ export default function CounselorProfile() {
     enabled: !!id
   });
 
+  const defaultSlots = [
+    { day: 'Friday', time: '05:00 PM IST', active: true },
+    { day: 'Friday', time: '07:30 PM IST', active: true },
+    { day: 'Saturday', time: '11:00 AM IST', active: true },
+    { day: 'Saturday', time: '04:00 PM IST', active: true },
+    { day: 'Sunday', time: '06:00 PM IST', active: true },
+  ];
+
+  const counselorSlots = (counselor?.availableSlots && counselor.availableSlots.length > 0)
+    ? counselor.availableSlots.map(s => ({
+        day: s.day,
+        time: s.time,
+        available: s.active !== false
+      }))
+    : defaultSlots.map(s => ({
+        day: s.day,
+        time: s.time,
+        available: s.active !== false
+      }));
+
   const bookMutation = useMutation({
-    mutationFn: () => counselorService.bookSession(counselor._id, user.token),
+    mutationFn: (bookingPayload) => counselorService.bookSession(counselor._id, bookingPayload, user.token),
     onSuccess: (data) => {
       if (data.remainingCredits !== undefined) {
         dispatch(setUser({ ...user, credits: data.remainingCredits }));
       }
       toast.success(data.message || "Session booked successfully!");
-      navigate('/auth/profile/chat', { state: { targetUserId: counselor.user?._id } });
+      const targetId = counselor.user?._id || counselor.user || counselor._id;
+      navigate('/auth/profile/chat', { state: { targetUserId: targetId } });
     },
     onError: (err) => {
       toast.error(err?.response?.data?.message || err?.message || "Booking failed");
@@ -58,14 +79,6 @@ export default function CounselorProfile() {
     }
   });
 
-  const slots = [
-    { day: 'Tomorrow (Fri)', time: '05:00 PM IST', available: true },
-    { day: 'Tomorrow (Fri)', time: '07:30 PM IST', available: true },
-    { day: 'Saturday (Sat)', time: '11:00 AM IST', available: true },
-    { day: 'Saturday (Sat)', time: '04:00 PM IST', available: false },
-    { day: 'Sunday (Sun)', time: '06:00 PM IST', available: true },
-  ];
-
   const handleBookSession = () => {
     if (!user) {
       toast.error("Please login to book a session!");
@@ -77,7 +90,14 @@ export default function CounselorProfile() {
       navigate('/auth/profile/my-credits');
       return;
     }
-    bookMutation.mutate();
+
+    const selectedSlot = counselorSlots[selectedSlotIndex];
+    const slotString = selectedSlot ? `${selectedSlot.day} - ${selectedSlot.time}` : "Upcoming Available Slot";
+
+    bookMutation.mutate({
+      slot: slotString,
+      topic: `1-on-1 Mentorship (${counselor.category?.title || counselor.categoryTitle || 'General'})`
+    });
   };
 
   const handleReviewSubmit = (e) => {
@@ -96,12 +116,14 @@ export default function CounselorProfile() {
     return <LoadingScreen loadingMessage="Loading Mentor Profile..." />;
   }
 
+  const effectiveRole = (user?.userType || 'student').toLowerCase();
+
   if (isError || !counselor) {
     return (
       <div className="min-h-screen bg-parchment flex flex-col">
         <Navbar activePage="counselors" />
         <div className="flex-1 flex">
-          <Sidebar activeTab="counselors" role="student" />
+          <Sidebar activeTab="counselors" role={effectiveRole} />
           <main className="flex-1 p-8 bg-grid-pattern overflow-y-auto">
             <div className="bg-parchment-card border-4 border-navy rounded-3xl p-12 text-center shadow-pop max-w-xl mx-auto">
               <div className="text-4xl mb-3">⚠️</div>
@@ -117,19 +139,22 @@ export default function CounselorProfile() {
     );
   }
 
-  const reviewsList = (counselor.ratings && counselor.ratings.length > 0)
-    ? counselor.ratings
-    : [
-      { user: { name: 'Aarav Sharma (IIT Delhi)' }, review: 'Very practical advice for Tier-2/Tier-3 students looking to land top product tech roles.', rating: 5 },
-      { user: { name: 'Sneha Reddy (NIT Trichy)' }, review: 'System design mock interview was stellar. Passed all 4 rounds! Worth every single credit.', rating: 5 }
-    ];
+  const counselorName = counselor.displayName || counselor.user?.name || counselor.name || "Career Counselor";
+  const counselorPic = counselor.user?.profilePic || counselor.profilePic;
+  const counselorLocation = counselor.displayLocation || counselor.user?.location || counselor.location || "India";
+  const counselorQual = counselor.displayQualification || counselor.user?.qualification || counselor.qualification || "Senior Industry Mentor";
+  const counselorCategory = counselor.displayCategory || counselor.category?.title || counselor.category?.name || counselor.categoryTitle || "Career Mentorship";
+  const counselorExp = counselor.experience ?? 3;
+  const counselorInitials = counselorName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'CN';
+
+  const reviewsList = counselor.ratings || [];
 
   return (
     <div className="min-h-screen bg-parchment flex flex-col">
       <Navbar activePage="counselors" />
 
       <div className="flex-1 flex">
-        <Sidebar activeTab="counselors" role="student" />
+        <Sidebar activeTab="counselors" role={effectiveRole} />
 
         <main className="flex-1 p-8 bg-grid-pattern overflow-y-auto">
           {/* Back Button */}
@@ -143,23 +168,23 @@ export default function CounselorProfile() {
           <div className="bg-yellow border-4 border-navy rounded-3xl p-8 shadow-pop mb-8 relative">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
               <div className="flex items-center space-x-5">
-                <div className="w-20 h-20 rounded-3xl bg-parchment-card border-4 border-navy flex items-center justify-center font-grotesk font-extrabold text-3xl text-navy shadow-pop overflow-hidden">
-                  {counselor.user?.profilePic ? (
-                    <img className="w-full h-full object-cover" src={counselor.user.profilePic} alt={counselor.user?.name} />
+                <div className="w-20 h-20 rounded-3xl bg-parchment-card border-4 border-navy flex items-center justify-center font-grotesk font-extrabold text-3xl text-navy shadow-pop overflow-hidden shrink-0">
+                  {counselorPic ? (
+                    <img className="w-full h-full object-cover" src={counselorPic} alt={counselorName} />
                   ) : (
-                    <span>{counselor.user?.name ? counselor.user.name.split(' ').map(n=>n[0]).join('') : 'CN'}</span>
+                    <span>{counselorInitials}</span>
                   )}
                 </div>
                 <div>
                   <div className="flex items-center space-x-3 mb-1">
-                    <h1 className="font-grotesk font-extrabold text-3xl text-navy">{counselor.user?.name}</h1>
+                    <h1 className="font-grotesk font-extrabold text-3xl text-navy">{counselorName}</h1>
                     <StatusBadge text="VERIFIED MENTOR" status="success" />
                   </div>
                   <p className="font-mono text-sm font-bold text-navy-muted">
-                    {counselor.category?.title} Mentor • {counselor.user?.qualification}
+                    {counselorCategory} Mentor • {counselorQual}
                   </p>
                   <p className="font-body text-xs text-navy mt-1">
-                    📍 {counselor.user?.location || "India"} • {counselor.experience}+ Years Industry Experience • ★ {counselor.avgRating || "5.0"} ({counselor.totalReviews || reviewsList.length} Reviews)
+                    📍 {counselorLocation} • {counselorExp}+ Years Industry Experience • ★ {counselor.avgRating || "5.0"} ({reviewsList.length} Reviews)
                   </p>
                 </div>
               </div>
@@ -177,9 +202,9 @@ export default function CounselorProfile() {
             {/* Left 2 Cols: Bio, Experience & Reviews */}
             <div className="lg:col-span-2 space-y-8">
               <div className="bg-parchment-card border-4 border-navy rounded-3xl p-6 shadow-pop">
-                <h2 className="font-grotesk font-extrabold text-xl text-navy mb-3">About {counselor.user?.name}</h2>
+                <h2 className="font-grotesk font-extrabold text-xl text-navy mb-3">About {counselorName}</h2>
                 <p className="font-body text-sm text-navy leading-relaxed mb-4">
-                  {counselor.user?.name} has over {counselor.experience} years of industry experience specializing in {counselor.category?.title}. Passionate about democratizing quality career guidance, resume ATS reviews, and technical interview preparation for college graduates across Tier-1, Tier-2, and Tier-3 Indian universities.
+                  {counselor.displayBio || `${counselorName} has over ${counselorExp} years of industry experience specializing in ${counselorCategory}. Passionate about democratizing quality career guidance, resume reviews, and technical interview preparation for college graduates across Tier-1, Tier-2, and Tier-3 Indian universities.`}
                 </p>
 
                 <h3 className="font-grotesk font-bold text-sm text-navy mb-2">Primary Consultation Areas:</h3>
@@ -204,7 +229,7 @@ export default function CounselorProfile() {
                 <div className="flex justify-between items-center mb-4">
                   <div>
                     <h2 className="font-grotesk font-extrabold text-xl text-navy">Student Reviews & Ratings</h2>
-                    <p className="font-mono text-xs text-rust font-bold">★ {counselor.avgRating || "5.0"} Average Rating</p>
+                    <p className="font-mono text-xs text-rust font-bold">★ {counselor.avgRating || "5.0"} Average Rating ({reviewsList.length} reviews)</p>
                   </div>
                   <Button
                     clickAction={() => setShowReviewForm(!showReviewForm)}
@@ -246,21 +271,31 @@ export default function CounselorProfile() {
                 )}
 
                 <div className="space-y-4">
-                  {reviewsList.map((rev, idx) => (
-                    <div key={idx} className="bg-parchment border-2 border-navy p-4 rounded-2xl shadow-pop-sm">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="font-grotesk font-bold text-sm text-navy">
-                          {rev.user?.name || "Verified Student"}
-                        </span>
-                        <span className="font-mono text-xs font-bold text-rust">
-                          {rev.rating ? `${rev.rating}.0 ★` : "5.0 ★"}
-                        </span>
-                      </div>
-                      <p className="font-body text-xs text-navy-muted">
-                        "{rev.review || rev.text}"
+                  {reviewsList.length === 0 ? (
+                    <div className="bg-parchment border-2 border-dashed border-navy/40 p-6 rounded-2xl text-center">
+                      <span className="text-2xl mb-2 block">⭐</span>
+                      <p className="font-grotesk font-bold text-sm text-navy">No reviews yet for this counselor</p>
+                      <p className="font-body text-xs text-navy-muted mt-1">
+                        Book a session and be the first to share your mentorship experience!
                       </p>
                     </div>
-                  ))}
+                  ) : (
+                    reviewsList.map((rev, idx) => (
+                      <div key={rev._id || idx} className="bg-parchment border-2 border-navy p-4 rounded-2xl shadow-pop-sm">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="font-grotesk font-bold text-sm text-navy">
+                            {rev.user?.name || "Verified Student"}
+                          </span>
+                          <span className="font-mono text-xs font-bold text-rust">
+                            {rev.rating ? `${rev.rating}.0 ★` : "5.0 ★"}
+                          </span>
+                        </div>
+                        <p className="font-body text-xs text-navy-muted">
+                          "{rev.review || rev.text}"
+                        </p>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </div>
@@ -272,7 +307,7 @@ export default function CounselorProfile() {
                 <p className="font-body text-xs text-navy-muted mb-4">Select an available IST time slot for your call:</p>
 
                 <div className="space-y-2.5 mb-6">
-                  {slots.map((slot, idx) => (
+                  {counselorSlots.map((slot, idx) => (
                     <div
                       key={idx}
                       onClick={() => slot.available && setSelectedSlotIndex(idx)}
