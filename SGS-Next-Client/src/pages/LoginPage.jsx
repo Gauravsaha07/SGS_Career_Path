@@ -35,6 +35,10 @@ export default function LoginPage() {
       toast.error("Please enter your email and password!");
       return;
     }
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters long!");
+      return;
+    }
     mutate(formData);
   };
 

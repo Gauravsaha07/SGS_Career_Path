@@ -13,11 +13,13 @@ const userSchema = new mongoose.Schema({
     phone: {
         type: String,
         unique: true,
-        required: [true, "Please Fill Phone!"]
+        sparse: true,
+        required: false
     },
     password: {
         type: String,
-        required: [true, "Please Fill Password!"]
+        required: [true, "Please Fill Password!"],
+        minlength: [6, "Password must be at least 6 characters!"]
     },
     userType: {
         type: String,
@@ -32,11 +34,11 @@ const userSchema = new mongoose.Schema({
     },
     qualification: {
         type: String,
-        required: [true, "Please Fill Qualification!"]
+        required: false
     },
     location: {
         type: String,
-        required: [true, "Please Fill Location!"]
+        required: false
     },
     credits: {
         type: Number,
@@ -45,12 +47,12 @@ const userSchema = new mongoose.Schema({
     },
     profilePic: {
         type: String,
-        required: true,
+        required: false
     }
 }, {
     timestamps: true
-})
+});
 
-const User = mongoose.model("User", userSchema)
+const User = mongoose.model("User", userSchema);
 
-export default User
+export default User;

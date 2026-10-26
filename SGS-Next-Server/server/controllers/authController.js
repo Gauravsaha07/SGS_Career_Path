@@ -13,6 +13,11 @@ const registerUser = async (req, res) => {
         throw new Error("Please Fill All Required Details!");
     }
 
+    if (password.length < 6) {
+        res.status(400);
+        throw new Error("Password must be at least 6 characters long!");
+    }
+
     // Assign standard defaults for career guidance platform if not explicitly passed
     qualification = qualification || status || "Undergraduate Student";
     location = location || "India";
@@ -100,6 +105,11 @@ const loginUser = async (req, res) => {
     if (!email || !password) {
         res.status(409);
         throw new Error("Please fill all details");
+    }
+
+    if (password.length < 6) {
+        res.status(401);
+        throw new Error("Invalid credentials");
     }
 
     const user = await User.findOne({ email: email.toLowerCase().trim() });

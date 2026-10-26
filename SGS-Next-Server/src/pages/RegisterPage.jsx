@@ -82,7 +82,7 @@ export default function RegisterPage() {
               <input
                 type="password"
                 defaultValue="••••••••••••"
-                placeholder="Minimum 8 characters"
+                placeholder="Minimum 6 characters"
                 class="w-full bg-parchment border-3 border-navy rounded-xl px-4 py-2.5 font-body text-sm text-navy shadow-pop-sm focus:outline-none"
               />
             </div>

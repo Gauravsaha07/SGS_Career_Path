@@ -42,6 +42,10 @@ export default function RegisterPage() {
       toast.error("Please fill in your name, email, and password!");
       return;
     }
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters long!");
+      return;
+    }
     if (!terms) {
       toast.error("Please accept the Terms of Service to continue.");
       return;
@@ -172,7 +176,7 @@ export default function RegisterPage() {
                 name="password"
                 value={password}
                 onChange={handleChange}
-                placeholder="Minimum 8 characters"
+                placeholder="Minimum 6 characters"
                 className="w-full bg-parchment border-3 border-navy rounded-xl px-4 py-2.5 font-body text-sm text-navy shadow-pop-sm focus:outline-none"
               />
             </div>
