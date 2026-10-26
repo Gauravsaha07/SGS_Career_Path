@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Header from '../components/Header';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
@@ -12,17 +12,23 @@ export default function RegisterPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { user } = useSelector(state => state.auth);
+  const fileInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
+    location: "",
     goal: "Software Engineering",
     status: "College Student (Undergrad)",
     password: "",
     terms: true
   });
 
-  const { name, email, goal, status, password, terms } = formData;
+  const [profileImage, setProfileImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+
+  const { name, email, phone, location, goal, status, password, terms } = formData;
 
   const { mutate, data, isPending, isSuccess, isError, error } = useMutation({
     mutationFn: (credentials) => authService.registerUser(credentials)
@@ -36,28 +42,105 @@ export default function RegisterPage() {
     });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!name.trim() || !email.trim() || !password) {
-      toast.error("Please fill in your name, email, and password!");
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Client-side file type validation
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Invalid file type! Please upload a JPG, PNG, or WebP image.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
+
+    // Client-side 2 MB size validation
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("File size exceeds 2 MB limit! Please choose a smaller image.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    setProfileImage(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const normalizePhone = (input) => {
+    if (!input) return "";
+    let cleaned = input.toString().replace(/\D/g, "");
+    if (cleaned.length === 12 && cleaned.startsWith("91")) {
+      cleaned = cleaned.slice(2);
+    } else if (cleaned.length === 11 && cleaned.startsWith("0")) {
+      cleaned = cleaned.slice(1);
+    }
+    return cleaned;
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (!name.trim()) {
+      toast.error("Please enter your full name!");
+      return;
+    }
+
+    if (!email.trim()) {
+      toast.error("Please enter your email address!");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      toast.error("Please enter a valid email address!");
+      return;
+    }
+
+    if (!phone.trim()) {
+      toast.error("Please enter your mobile number!");
+      return;
+    }
+
+    const normalized = normalizePhone(phone);
+    if (!/^[6-9]\d{9}$/.test(normalized)) {
+      toast.error("Please enter a valid 10-digit Indian mobile number (starts with 6-9)!");
+      return;
+    }
+
+    if (!location.trim()) {
+      toast.error("Please enter your location (City, State)!");
+      return;
+    }
+
+    if (!password) {
+      toast.error("Please create a password!");
+      return;
+    }
+
     if (password.length < 6) {
       toast.error("Password must be at least 6 characters long!");
       return;
     }
+
     if (!terms) {
       toast.error("Please accept the Terms of Service to continue.");
       return;
     }
-    mutate({
-      name: name.trim(),
-      email: email.trim(),
-      password,
-      qualification: status,
-      location: "India",
-      goal: goal
-    });
+
+    // Prepare FormData for multipart/form-data upload
+    const submitData = new FormData();
+    submitData.append("name", name.trim());
+    submitData.append("email", email.trim().toLowerCase());
+    submitData.append("phone", normalized);
+    submitData.append("location", location.trim());
+    submitData.append("password", password);
+    submitData.append("qualification", status);
+    submitData.append("goal", goal);
+
+    if (profileImage) {
+      submitData.append("profile_image", profileImage);
+    }
+
+    mutate(submitData);
   };
 
   useEffect(() => {
@@ -89,7 +172,7 @@ export default function RegisterPage() {
             Claim 100 Free Credits
           </div>
 
-          <div className="text-center mb-8">
+          <div className="text-center mb-6">
             <div className="inline-block bg-rust-container border-3 border-navy px-4 py-1 rounded-full shadow-pop-sm font-mono text-xs font-bold text-navy mb-3">
               START YOUR JOURNEY 🚀
             </div>
@@ -130,7 +213,37 @@ export default function RegisterPage() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block font-grotesk font-bold text-xs uppercase tracking-wider text-navy mb-1.5">
+                  Mobile Number
+                </label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={phone}
+                  onChange={handleChange}
+                  placeholder="e.g. 9876543210"
+                  className="w-full bg-parchment border-3 border-navy rounded-xl px-4 py-2.5 font-body text-sm text-navy shadow-pop-sm focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block font-grotesk font-bold text-xs uppercase tracking-wider text-navy mb-1.5">
+                  Location (City, State)
+                </label>
+                <input
+                  type="text"
+                  name="location"
+                  value={location}
+                  onChange={handleChange}
+                  placeholder="e.g. Bhopal, Madhya Pradesh"
+                  className="w-full bg-parchment border-3 border-navy rounded-xl px-4 py-2.5 font-body text-sm text-navy shadow-pop-sm focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block font-grotesk font-bold text-xs uppercase tracking-wider text-navy mb-1.5">
                   Primary Goal
@@ -159,11 +272,41 @@ export default function RegisterPage() {
                   onChange={handleChange}
                   className="w-full bg-parchment border-3 border-navy rounded-xl px-3 py-2.5 font-body text-sm text-navy shadow-pop-sm focus:outline-none"
                 >
+                  <option>High School (9th)</option>
+                  <option>High School (10th)</option>
+                  <option>High School (11th/12th)</option>
                   <option>College Student (Undergrad)</option>
                   <option>Recent Graduate</option>
                   <option>Working Professional</option>
-                  <option>High School (11th/12th)</option>
                 </select>
+              </div>
+            </div>
+
+            {/* Profile Picture Upload with Preview */}
+            <div>
+              <label className="block font-grotesk font-bold text-xs uppercase tracking-wider text-navy mb-1.5">
+                Profile Picture (Optional)
+              </label>
+              <div className="flex items-center space-x-3 bg-parchment border-3 border-navy rounded-xl p-3 shadow-pop-sm">
+                <div className="w-12 h-12 rounded-xl bg-sky border-2 border-navy flex items-center justify-center font-grotesk font-extrabold text-sm text-navy overflow-hidden shrink-0">
+                  {imagePreview ? (
+                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                  ) : (
+                    name ? name.slice(0, 2).toUpperCase() : "CB"
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept="image/jpeg,image/png,image/webp,image/jpg"
+                    onChange={handleImageChange}
+                    className="w-full text-xs text-navy file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-2 file:border-navy file:text-xs file:font-grotesk file:font-bold file:bg-yellow file:text-navy hover:file:bg-yellow-fixed cursor-pointer"
+                  />
+                  <p className="font-mono text-[10px] text-navy-muted mt-1 truncate">
+                    Max 2 MB (JPG, PNG, WebP). Default avatar used if skipped.
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -181,7 +324,7 @@ export default function RegisterPage() {
               />
             </div>
 
-            <div className="flex items-start space-x-3 pt-2">
+            <div className="flex items-start space-x-3 pt-1">
               <input
                 type="checkbox"
                 name="terms"
@@ -198,7 +341,7 @@ export default function RegisterPage() {
 
             <button
               type="submit"
-              className="w-full bg-yellow hover:bg-yellow-fixed text-navy font-grotesk font-extrabold text-base py-3.5 rounded-2xl border-3 border-navy shadow-pop transition-all active:translate-x-1 active:translate-y-1 active:shadow-none mt-4 cursor-pointer"
+              className="w-full bg-yellow hover:bg-yellow-fixed text-navy font-grotesk font-extrabold text-base py-3.5 rounded-2xl border-3 border-navy shadow-pop transition-all active:translate-x-1 active:translate-y-1 active:shadow-none mt-3 cursor-pointer"
             >
               CREATE FREE ACCOUNT & CLAIM CREDITS →
             </button>

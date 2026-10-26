@@ -1,50 +1,90 @@
-import bcrypt from "bcryptjs"
-import jwt from "jsonwebtoken"
-import User from "../models/userModel.js"
-import Credit from "../models/creditModel.js"
-import fs from "node:fs"
-import uploadToCloudinary from "../middleware/cloudinaryMiddleware.js"
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import User from "../models/userModel.js";
+import Credit from "../models/creditModel.js";
+import fs from "node:fs";
+import uploadToCloudinary from "../middleware/cloudinaryMiddleware.js";
+
+// Helper: Normalize phone to 10 digits
+export const normalizePhone = (input) => {
+    if (!input) return "";
+    let cleaned = input.toString().replace(/\D/g, "");
+    if (cleaned.length === 12 && cleaned.startsWith("91")) {
+        cleaned = cleaned.slice(2);
+    } else if (cleaned.length === 11 && cleaned.startsWith("0")) {
+        cleaned = cleaned.slice(1);
+    }
+    return cleaned;
+};
+
+// Helper: Validate 10-digit Indian mobile number (starts with 6-9)
+export const isValidIndianPhone = (phone) => {
+    return /^[6-9]\d{9}$/.test(phone);
+};
 
 const registerUser = async (req, res) => {
     let { name, email, phone, password, qualification, location, goal, status } = req.body;
 
-    if (!name || !email || !password) {
-        res.status(409);
-        throw new Error("Please Fill All Required Details!");
+    if (!name || !name.trim()) {
+        res.status(400);
+        throw new Error("Please enter your full name!");
     }
 
-    if (password.length < 6) {
+    if (!email || !email.trim()) {
+        res.status(400);
+        throw new Error("Please enter your email address!");
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+        res.status(400);
+        throw new Error("Please enter a valid email address!");
+    }
+
+    if (!phone || !phone.toString().trim()) {
+        res.status(400);
+        throw new Error("Please enter your 10-digit mobile number!");
+    }
+
+    const normalizedPhone = normalizePhone(phone);
+    if (!isValidIndianPhone(normalizedPhone)) {
+        res.status(400);
+        throw new Error("Please enter a valid 10-digit Indian mobile number (starts with 6-9)!");
+    }
+
+    if (!location || !location.trim()) {
+        res.status(400);
+        throw new Error("Please enter your location (City, State)!");
+    }
+
+    if (!password || password.length < 6) {
         res.status(400);
         throw new Error("Password must be at least 6 characters long!");
     }
 
-    // Assign standard defaults for career guidance platform if not explicitly passed
-    qualification = qualification || status || "Undergraduate Student";
-    location = location || "India";
+    qualification = qualification || status || "College Student (Undergrad)";
 
-    // Format or validate phone number
-    if (!phone) {
-        phone = "9" + Math.floor(100000000 + Math.random() * 900000000);
-    } else if (phone.length !== 10) {
+    // Uniqueness checks: separate 409 checks for email and phone
+    const emailExist = await User.findOne({ email: email.toLowerCase().trim() });
+    if (emailExist) {
         res.status(409);
-        throw new Error('Invalid Phone Number! Must be 10 digits.');
+        throw new Error("User with this email already exists!");
     }
 
-    // Check if user already exists
-    let emailExist = await User.findOne({ email: email.toLowerCase().trim() });
-    let phoneExist = await User.findOne({ phone: phone });
-
-    if (emailExist || phoneExist) {
+    const phoneExist = await User.findOne({
+        $or: [{ phone: normalizedPhone }, { phone: phone.toString().trim() }]
+    });
+    if (phoneExist) {
         res.status(409);
-        throw new Error('User with this email or phone already exists!');
+        throw new Error("User with this mobile number already exists!");
     }
 
-    // Hash Password
+    // Hash Password (10 rounds)
     const salt = bcrypt.genSaltSync(10);
     const hashedPassword = bcrypt.hashSync(password, salt);
 
     // Profile picture: real upload if provided, otherwise deterministic avatar
-    let profilePicUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D1A3C&color=FFD84D&bold=true`;
+    let profilePicUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name.trim())}&background=0D1A3C&color=FFD84D&bold=true`;
     if (req.file) {
         try {
             const uploadResult = await uploadToCloudinary(req.file.path);
@@ -61,12 +101,12 @@ const registerUser = async (req, res) => {
     }
 
     const user = await User.create({
-        name,
+        name: name.trim(),
         email: email.toLowerCase().trim(),
-        phone,
+        phone: normalizedPhone,
         password: hashedPassword,
         qualification,
-        location,
+        location: location.trim(),
         credits: 100, // 100 free welcome credits as stated across landing and registration
         profilePic: profilePicUrl
     });
@@ -100,9 +140,11 @@ const registerUser = async (req, res) => {
 };
 
 const loginUser = async (req, res) => {
-    const { email, password } = req.body;
+    // Accepts identifier (or email for backward compatibility) and password
+    const { identifier, email, password } = req.body;
+    const loginTarget = identifier || email;
 
-    if (!email || !password) {
+    if (!loginTarget || !password) {
         res.status(409);
         throw new Error("Please fill all details");
     }
@@ -112,11 +154,26 @@ const loginUser = async (req, res) => {
         throw new Error("Invalid credentials");
     }
 
-    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    let user = null;
+    const trimmedTarget = loginTarget.trim();
+
+    if (trimmedTarget.includes("@")) {
+        // Query by email
+        user = await User.findOne({ email: trimmedTarget.toLowerCase() });
+    } else {
+        // Query by mobile number (normalized and raw)
+        const normalizedPhone = normalizePhone(trimmedTarget);
+        user = await User.findOne({
+            $or: [
+                { phone: normalizedPhone },
+                { phone: trimmedTarget }
+            ]
+        });
+    }
 
     if (!user) {
         res.status(401);
-        throw new Error("Invalid Credentials");
+        throw new Error("Invalid credentials");
     }
 
     if (!user.isActive) {
@@ -141,7 +198,7 @@ const loginUser = async (req, res) => {
         });
     } else {
         res.status(401);
-        throw new Error("Invalid Credentials");
+        throw new Error("Invalid credentials");
     }
 };
 
@@ -162,10 +219,27 @@ const updateProfile = async (req, res) => {
     }
 
     const { name, phone, qualification, location } = req.body;
-    if (name) user.name = name;
-    if (phone) user.phone = phone;
-    if (qualification) user.qualification = qualification;
-    if (location) user.location = location;
+    if (name && name.trim()) user.name = name.trim();
+
+    if (phone && phone.toString().trim()) {
+        const normalizedPhone = normalizePhone(phone);
+        if (!isValidIndianPhone(normalizedPhone)) {
+            res.status(400);
+            throw new Error("Please enter a valid 10-digit Indian mobile number (starts with 6-9)!");
+        }
+        const phoneExist = await User.findOne({
+            phone: normalizedPhone,
+            _id: { $ne: user._id }
+        });
+        if (phoneExist) {
+            res.status(409);
+            throw new Error("User with this mobile number already exists!");
+        }
+        user.phone = normalizedPhone;
+    }
+
+    if (qualification && qualification.trim()) user.qualification = qualification.trim();
+    if (location && location.trim()) user.location = location.trim();
 
     if (req.file) {
         try {

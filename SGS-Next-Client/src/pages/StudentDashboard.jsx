@@ -5,16 +5,41 @@ import Button from '../components/Button';
 import StatusBadge from '../components/StatusBadge';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import roadmapService from '../services/roadmapService';
 import authService from '../services/authService';
 import { setUser } from '../features/auth/authSlice';
+import toast from 'react-hot-toast';
 
 export default function StudentDashboard() {
   const { user } = useSelector(state => state.auth);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const fileInputRef = useRef(null);
+
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [profileForm, setProfileForm] = useState({
+    name: user?.name || "",
+    phone: user?.phone || "",
+    location: user?.location || "",
+    qualification: user?.qualification || "College Student (Undergrad)"
+  });
+  const [editImageFile, setEditImageFile] = useState(null);
+  const [editImagePreview, setEditImagePreview] = useState(user?.profilePic || null);
+
+  useEffect(() => {
+    if (user) {
+      setProfileForm({
+        name: user.name || "",
+        phone: user.phone || "",
+        location: user.location || "",
+        qualification: user.qualification || "College Student (Undergrad)"
+      });
+      setEditImagePreview(user.profilePic || null);
+    }
+  }, [user]);
 
   // Sync latest user profile and credits
   useEffect(() => {
@@ -43,6 +68,90 @@ export default function StudentDashboard() {
     queryFn: () => roadmapService.fetchMyRoadmaps(user?.token),
     enabled: !!user?.token
   });
+
+  const handleEditChange = (e) => {
+    setProfileForm({
+      ...profileForm,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleEditImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Invalid file type! Please upload a JPG, PNG, or WebP image.");
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("File size exceeds 2 MB limit! Please choose a smaller image.");
+      return;
+    }
+
+    setEditImageFile(file);
+    setEditImagePreview(URL.createObjectURL(file));
+  };
+
+  const normalizePhone = (input) => {
+    if (!input) return "";
+    let cleaned = input.toString().replace(/\D/g, "");
+    if (cleaned.length === 12 && cleaned.startsWith("91")) {
+      cleaned = cleaned.slice(2);
+    } else if (cleaned.length === 11 && cleaned.startsWith("0")) {
+      cleaned = cleaned.slice(1);
+    }
+    return cleaned;
+  };
+
+  const handleSaveProfile = async (e) => {
+    e.preventDefault();
+
+    if (!profileForm.name.trim()) {
+      toast.error("Name cannot be empty!");
+      return;
+    }
+
+    if (!profileForm.location.trim()) {
+      toast.error("Location cannot be empty!");
+      return;
+    }
+
+    let normalizedPhone = "";
+    if (profileForm.phone.trim()) {
+      normalizedPhone = normalizePhone(profileForm.phone);
+      if (!/^[6-9]\d{9}$/.test(normalizedPhone)) {
+        toast.error("Please enter a valid 10-digit Indian mobile number (starts with 6-9)!");
+        return;
+      }
+    }
+
+    setIsUpdating(true);
+    try {
+      const submitData = new FormData();
+      submitData.append("name", profileForm.name.trim());
+      submitData.append("location", profileForm.location.trim());
+      submitData.append("qualification", profileForm.qualification);
+      if (normalizedPhone) {
+        submitData.append("phone", normalizedPhone);
+      }
+      if (editImageFile) {
+        submitData.append("profile_image", editImageFile);
+      }
+
+      const updated = await authService.updateProfile(submitData, user.token);
+      dispatch(setUser({ ...user, ...updated, token: user.token }));
+      toast.success("Profile updated successfully!");
+      setShowEditModal(false);
+      setEditImageFile(null);
+    } catch (err) {
+      toast.error(err?.response?.data?.message || err?.message || "Failed to update profile");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   const upcomingSessions = [
     {
@@ -76,20 +185,40 @@ export default function StudentDashboard() {
           {/* Welcome Banner */}
           <div className="bg-yellow border-4 border-navy rounded-3xl p-6 shadow-pop mb-8 relative">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <div className="inline-block bg-navy text-yellow font-mono text-[10px] font-bold px-3 py-1 rounded-full uppercase mb-2">
-                  Student Workspace • {user?.name}
+              <div className="flex items-start space-x-4">
+                <div className="w-16 h-16 rounded-2xl bg-sky border-3 border-navy flex items-center justify-center font-grotesk font-extrabold text-xl text-navy shadow-pop-sm overflow-hidden shrink-0 mt-1">
+                  {user?.profilePic ? (
+                    <img src={user.profilePic} alt={user.name} className="w-full h-full object-cover" />
+                  ) : (
+                    user?.name ? user.name.slice(0, 2).toUpperCase() : 'CB'
+                  )}
                 </div>
-                <h1 className="font-grotesk font-extrabold text-3xl text-navy">
-                  Namaste, {user?.name}! Ready to level up? ⚡
-                </h1>
-                <p className="font-body text-sm text-navy-muted mt-1">
-                  You have <span className="font-bold text-navy">{user?.credits ?? 0} Credits</span> available. Your current level is <span className="font-bold text-rust">{user?.qualification || 'Undergraduate'}</span>.
-                </p>
+
+                <div>
+                  <div className="inline-block bg-navy text-yellow font-mono text-[10px] font-bold px-3 py-1 rounded-full uppercase mb-1">
+                    Student Workspace • {user?.name}
+                  </div>
+                  <h1 className="font-grotesk font-extrabold text-2xl sm:text-3xl text-navy">
+                    Namaste, {user?.name}! Ready to level up? ⚡
+                  </h1>
+                  <p className="font-body text-xs sm:text-sm text-navy-muted mt-1">
+                    You have <span className="font-bold text-navy">{user?.credits ?? 0} Credits</span> available. Your current level is <span className="font-bold text-rust">{user?.qualification || 'Undergraduate'}</span>.
+                  </p>
+                  <p className="font-mono text-xs text-navy mt-1">
+                    📍 {user?.location || 'India'} • 📱 {user?.phone || 'Mobile not set'}
+                  </p>
+                </div>
               </div>
 
-              <div className="flex items-center space-x-3">
-                <Link to={"/auth/ai-roadmap"} className="font-grotesk border border-black tracking-wide rounded-full transition-all active:translate-x-1 active:translate-y-1 active:shadow-none px-5 py-2.5 text-sm font-extrabold bg-yellow text-navy hover:bg-yellow-fixed border-3 border-navy shadow-pop">
+              <div className="flex items-center space-x-3 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(true)}
+                  className="font-grotesk border-2 border-navy tracking-wide rounded-full transition-all active:translate-x-1 active:translate-y-1 px-4 py-2.5 text-xs sm:text-sm font-extrabold bg-white text-navy hover:bg-parchment-dim shadow-pop-sm cursor-pointer"
+                >
+                  Edit Profile ✏️
+                </button>
+                <Link to={"/auth/ai-roadmap"} className="font-grotesk border border-black tracking-wide rounded-full transition-all active:translate-x-1 active:translate-y-1 active:shadow-none px-4 sm:px-5 py-2.5 text-xs sm:text-sm font-extrabold bg-yellow text-navy hover:bg-yellow-fixed border-3 border-navy shadow-pop">
                   + Generate Roadmap
                 </Link>
               </div>
@@ -352,6 +481,140 @@ export default function StudentDashboard() {
           </div>
         </main>
       </div>
+
+      {/* Edit Profile Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-navy/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-parchment-card border-4 border-navy rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-pop-lg space-y-4">
+            <div className="flex justify-between items-center pb-2 border-b-2 border-navy/20">
+              <div>
+                <span className="inline-block bg-yellow border-2 border-navy font-mono text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">
+                  STUDENT PROFILE
+                </span>
+                <h3 className="font-grotesk font-extrabold text-xl text-navy mt-1">Edit Profile Details</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowEditModal(false)}
+                className="font-mono font-bold text-navy text-sm p-1 hover:text-rust"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveProfile} className="space-y-4">
+              {/* Profile Image with preview and picker */}
+              <div>
+                <label className="block font-grotesk font-bold text-xs uppercase tracking-wider text-navy mb-1.5">
+                  Profile Picture
+                </label>
+                <div className="flex items-center space-x-3 bg-parchment border-2 border-navy rounded-xl p-3">
+                  <div className="w-14 h-14 rounded-xl bg-sky border-2 border-navy flex items-center justify-center font-grotesk font-extrabold text-sm text-navy overflow-hidden shrink-0">
+                    {editImagePreview ? (
+                      <img src={editImagePreview} alt="Preview" className="w-full h-full object-cover" />
+                    ) : (
+                      user?.name ? user.name.slice(0, 2).toUpperCase() : "CB"
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      accept="image/jpeg,image/png,image/webp,image/jpg"
+                      onChange={handleEditImageChange}
+                      className="w-full text-xs text-navy file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-2 file:border-navy file:text-xs file:font-grotesk file:font-bold file:bg-yellow file:text-navy hover:file:bg-yellow-fixed cursor-pointer"
+                    />
+                    <p className="font-mono text-[10px] text-navy-muted mt-1 truncate">
+                      Max 2 MB (JPG, PNG, WebP).
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-grotesk font-bold text-xs uppercase tracking-wider text-navy mb-1">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={profileForm.name}
+                  onChange={handleEditChange}
+                  className="w-full bg-parchment border-2 border-navy rounded-xl px-3 py-2 font-body text-sm text-navy focus:outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-grotesk font-bold text-xs uppercase tracking-wider text-navy mb-1">
+                    Mobile Number
+                  </label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={profileForm.phone}
+                    onChange={handleEditChange}
+                    placeholder="e.g. 9876543210"
+                    className="w-full bg-parchment border-2 border-navy rounded-xl px-3 py-2 font-body text-sm text-navy focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-grotesk font-bold text-xs uppercase tracking-wider text-navy mb-1">
+                    Location
+                  </label>
+                  <input
+                    type="text"
+                    name="location"
+                    value={profileForm.location}
+                    onChange={handleEditChange}
+                    placeholder="e.g. Bhopal, Madhya Pradesh"
+                    className="w-full bg-parchment border-2 border-navy rounded-xl px-3 py-2 font-body text-sm text-navy focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-grotesk font-bold text-xs uppercase tracking-wider text-navy mb-1">
+                  Current Status / Qualification
+                </label>
+                <select
+                  name="qualification"
+                  value={profileForm.qualification}
+                  onChange={handleEditChange}
+                  className="w-full bg-parchment border-2 border-navy rounded-xl px-3 py-2 font-body text-sm text-navy focus:outline-none"
+                >
+                  <option>High School (9th)</option>
+                  <option>High School (10th)</option>
+                  <option>High School (11th/12th)</option>
+                  <option>College Student (Undergrad)</option>
+                  <option>Recent Graduate</option>
+                  <option>Working Professional</option>
+                </select>
+              </div>
+
+              <div className="flex justify-end space-x-2 pt-2 border-t-2 border-navy/20">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowEditModal(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="sm"
+                  disabled={isUpdating}
+                >
+                  {isUpdating ? "Saving..." : "Save Changes"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

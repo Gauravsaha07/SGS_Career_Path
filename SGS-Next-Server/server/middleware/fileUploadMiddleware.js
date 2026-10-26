@@ -1,18 +1,30 @@
 import multer from "multer";
+import crypto from "crypto";
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'uploads')
+        cb(null, 'uploads');
     },
     filename: (req, file, cb) => {
-
-        const ext = file.originalname.includes('.') ? file.originalname.split('.').pop() : 'jpg'
-        const fileName = crypto.randomUUID() + "." + ext
-
-        cb(null, fileName )
+        const ext = file.originalname.includes('.') ? file.originalname.split('.').pop() : 'jpg';
+        const fileName = crypto.randomUUID() + "." + ext;
+        cb(null, fileName);
     }
-})
+});
 
-const upload = multer({ storage })
+const fileFilter = (req, file, cb) => {
+    const allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+    if (allowedMimes.includes(file.mimetype)) {
+        cb(null, true);
+    } else {
+        cb(new Error("Invalid file type! Only JPG, PNG, and WebP images are allowed."), false);
+    }
+};
 
-export default upload
+const upload = multer({
+    storage,
+    limits: { fileSize: 2 * 1024 * 1024 }, // 2 MB limit
+    fileFilter
+});
+
+export default upload;
