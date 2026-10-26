@@ -97,12 +97,12 @@ export default function LandingPage() {
           </p>
 
           <div className="mt-8 flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
-            <button
-              type="button"
-              className="bg-rust text-white font-grotesk font-medium text-sm px-7 py-3.5 rounded-full border border-navy hover:bg-rust/90 transition-all"
+            <Link
+              to="/register"
+              className="bg-rust text-white font-grotesk font-medium text-sm px-7 py-3.5 rounded-full border border-navy hover:bg-rust/90 transition-all text-center inline-block"
             >
               Get started free (100 Credits) →
-            </button>
+            </Link>
             <span className="font-mono text-xs text-navy-muted">
               ✓ No credit card required • Instant access
             </span>
@@ -177,9 +177,9 @@ export default function LandingPage() {
                     </div>
                     <div className="mt-4 pt-2 border-t border-navy/20 flex justify-between items-center">
                       <span className="font-mono text-[10px] font-bold text-navy-muted">Instant Access</span>
-                      <button type="button" className="px-3 py-1 bg-yellow border border-navy rounded-full font-grotesk font-medium text-xs text-navy">
+                      <Link to="/register" className="px-3 py-1 bg-yellow border border-navy rounded-full font-grotesk font-medium text-xs text-navy inline-block hover:bg-yellow-fixed transition-all">
                         Explore Step →
-                      </button>
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -221,12 +221,12 @@ export default function LandingPage() {
               </div>
 
               <div className="mt-8 pt-4 border-t border-navy">
-                <button
-                  type="button"
-                  className="w-full bg-rust text-white font-grotesk font-medium text-sm py-3 rounded-full border border-navy hover:bg-rust/90 transition-all"
+                <Link
+                  to="/register"
+                  className="w-full bg-rust text-white font-grotesk font-medium text-sm py-3 rounded-full border border-navy hover:bg-rust/90 transition-all text-center inline-block"
                 >
                   Create Free Student Account →
-                </button>
+                </Link>
               </div>
             </div>
 
@@ -258,12 +258,12 @@ export default function LandingPage() {
               </div>
 
               <div className="mt-8 pt-4 border-t border-navy">
-                <button
-                  type="button"
-                  className="w-full bg-navy text-white font-grotesk font-medium text-sm py-3 rounded-full border border-navy hover:bg-navy-light transition-all"
+                <Link
+                  to="/auth/profile/become-counselor"
+                  className="w-full bg-navy text-white font-grotesk font-medium text-sm py-3 rounded-full border border-navy hover:bg-navy-light transition-all text-center inline-block"
                 >
                   Apply as Counselor Partner →
-                </button>
+                </Link>
               </div>
             </div>
           </div>
@@ -281,9 +281,9 @@ export default function LandingPage() {
                 </div>
                 <h2 className="font-grotesk font-medium text-2xl text-navy">Featured Careers & Verified Mentors</h2>
               </div>
-              <a href="#" className="font-grotesk font-medium text-xs text-rust hover:underline">
+              <Link to="/auth/careers" className="font-grotesk font-medium text-xs text-rust hover:underline">
                 Explore Full Directory (100+ Roles) →
-              </a>
+              </Link>
             </div>
 
             <div className="divide-y divide-navy/20 border-b border-navy/20">
@@ -386,12 +386,12 @@ export default function LandingPage() {
           </p>
 
           <div className="pt-4 flex justify-center">
-            <button
-              type="button"
-              className="bg-rust text-white font-grotesk font-medium text-sm px-8 py-4 rounded-full border border-navy hover:bg-rust/90 transition-all"
+            <Link
+              to="/register"
+              className="bg-rust text-white font-grotesk font-medium text-sm px-8 py-4 rounded-full border border-navy hover:bg-rust/90 transition-all text-center inline-block"
             >
               CLAIM 100 FREE CREDITS & GET STARTED →
-            </button>
+            </Link>
           </div>
         </div>
       </section>
@@ -417,28 +417,28 @@ export default function LandingPage() {
             <div>
               <div className="font-mono text-xs font-bold text-navy uppercase mb-3">Student Tools</div>
               <ul className="space-y-2 font-body text-xs text-navy-muted">
-                <li><a href="#" className="hover:text-rust">Career Explorer</a></li>
-                <li><a href="#" className="hover:text-rust">AI Roadmap Generator</a></li>
-                <li><a href="#" className="hover:text-rust">Verified Counselors</a></li>
-                <li><a href="#" className="hover:text-rust">My Credits Wallet</a></li>
+                <li><Link to="/auth/careers" className="hover:text-rust">Career Explorer</Link></li>
+                <li><Link to="/auth/ai-roadmap" className="hover:text-rust">AI Roadmap Generator</Link></li>
+                <li><Link to="/auth/counselors" className="hover:text-rust">Verified Counselors</Link></li>
+                <li><Link to="/auth/profile/my-credits" className="hover:text-rust">My Credits Wallet</Link></li>
               </ul>
             </div>
 
             <div>
               <div className="font-mono text-xs font-bold text-navy uppercase mb-3">Programs</div>
               <ul className="space-y-2 font-body text-xs text-navy-muted">
-                <li><a href="#" className="hover:text-rust">Join as Counselor Partner</a></li>
-                <li><a href="#" className="hover:text-rust">Student Ambassador Program</a></li>
-                <li><a href="#" className="hover:text-rust">College Placement Cell Partnership</a></li>
+                <li><Link to="/auth/profile/become-counselor" className="hover:text-rust">Join as Counselor Partner</Link></li>
+                <li><Link to="/auth/profile/become-counselor" className="hover:text-rust">Student Ambassador Program</Link></li>
+                <li><Link to="/auth/careers" className="hover:text-rust">College Placement Cell Partnership</Link></li>
               </ul>
             </div>
 
             <div>
               <div className="font-mono text-xs font-bold text-navy uppercase mb-3">Legal & Support</div>
               <ul className="space-y-2 font-body text-xs text-navy-muted">
-                <li><a href="#" className="hover:text-rust">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-rust">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-rust">Refund Policy</a></li>
+                <li><Link to="/register" className="hover:text-rust">Terms of Service</Link></li>
+                <li><Link to="/register" className="hover:text-rust">Privacy Policy</Link></li>
+                <li><Link to="/auth/profile/my-credits" className="hover:text-rust">Refund Policy</Link></li>
               </ul>
             </div>
           </div>
