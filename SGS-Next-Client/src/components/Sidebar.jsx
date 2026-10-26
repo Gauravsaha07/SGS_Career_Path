@@ -21,7 +21,7 @@ export default function Sidebar({ activeTab = 'overview', role = 'student' }) {
   const counselorNav = [
     { id: 'counselor_overview', label: 'Counselor Workspace', link: '/auth/counselor', icon: '📈' },
     { id: 'counselor_sessions', label: 'Student Bookings', link: '/auth/counselor', icon: '📅' },
-    { id: 'counselor_messages', label: 'Student Messages', link: '/auth/counselor', icon: '💬' },
+    { id: 'counselor_messages', label: 'Student Messages', link: '/auth/profile/chat', icon: '💬' },
     { id: 'counselor_earnings', label: 'Earnings & Credits', link: '/auth/counselor', icon: '💰' },
   ];
 

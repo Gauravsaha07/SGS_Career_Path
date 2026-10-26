@@ -45,11 +45,25 @@ export const getConversations = async (req, res) => {
             };
         });
 
+        // If targetUserId passed in query and not yet in conversationList, prepend them
+        const targetUserId = req.query.targetUserId;
+        if (targetUserId && targetUserId !== currentUserId && !partnerIds.includes(targetUserId)) {
+            const targetUser = await User.findById(targetUserId).select("name email profilePic userType qualification location");
+            if (targetUser) {
+                conversationList.unshift({
+                    user: targetUser,
+                    lastMessage: "Start a mentorship conversation...",
+                    lastMessageTime: new Date(),
+                    unreadCount: 0
+                });
+            }
+        }
+
         // If user has fewer than 2 conversations, append verified active counselors so they can easily chat
         if (conversationList.length < 2) {
             const activeCounselors = await Counselor.find({ status: "accepted" }).populate("user", "name email profilePic userType qualification location");
             for (const cn of activeCounselors) {
-                if (cn.user && cn.user._id.toString() !== currentUserId && !partnerIds.includes(cn.user._id.toString())) {
+                if (cn.user && cn.user._id.toString() !== currentUserId && !conversationList.some(c => c.user?._id?.toString() === cn.user._id.toString())) {
                     conversationList.push({
                         user: cn.user,
                         lastMessage: "Start a mentorship conversation...",

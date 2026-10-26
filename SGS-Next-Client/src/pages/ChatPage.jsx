@@ -1,30 +1,207 @@
+import { useState, useEffect, useRef } from 'react';
+import { useSelector } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { io } from 'socket.io-client';
+import { toast } from 'react-hot-toast';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 import ChatBubble from '../components/ChatBubble';
 import Button from '../components/Button';
 import StatusBadge from '../components/StatusBadge';
+import messageService from '../services/messageService';
 
 export default function ChatPage() {
-  const conversations = [
-    { id: 1, name: 'Dr. Ramesh Kumar', role: 'Full-Stack Mentor', active: true, unread: 0, avatar: 'RK' },
-    { id: 2, name: 'Ananya Roy', role: 'UI/UX Mentor', active: false, unread: 2, avatar: 'AR' },
-    { id: 3, name: 'CareerBridge AI Bot', role: 'Automated Support', active: false, unread: 0, avatar: 'AI' },
-  ];
+  const { user } = useSelector((state) => state.auth);
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  const messages = [
-    { id: 101, sender: 'Dr. Ramesh Kumar', time: '10:15 AM', message: 'Namaste Aarav! I reviewed your GitHub repository for the Next.js e-commerce app.', isSelf: false },
-    { id: 102, sender: 'Aarav Sharma', time: '10:17 AM', message: 'Thanks Dr. Ramesh! Did you spot any performance issues in the API routes?', isSelf: true },
-    { id: 103, sender: 'Dr. Ramesh Kumar', time: '10:20 AM', message: 'Your MongoDB query inside getStaticProps needs indexing on the category field. Other than that, the UI looks very solid!', isSelf: false },
-    { id: 104, sender: 'Aarav Sharma', time: '10:22 AM', message: 'Got it! I will add the compound index today. Can we discuss system design mock prep tomorrow at 5 PM?', isSelf: true },
-    { id: 105, sender: 'Dr. Ramesh Kumar', time: '10:25 AM', message: 'Yes, absolutely! Make sure to revise load balancer algorithms (Round Robin, Least Connections) beforehand. See you tomorrow!', isSelf: false },
-  ];
+  const [conversations, setConversations] = useState([]);
+  const [activePartner, setActivePartner] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [onlineUserIds, setOnlineUserIds] = useState(new Set());
+  const [loadingHistory, setLoadingHistory] = useState(false);
+
+  const socketRef = useRef(null);
+  const messagesEndRef = useRef(null);
+  const fileInputRef = useRef(null);
+
+  const targetUserId = location.state?.targetUserId;
+
+  // Auto-scroll to bottom of chat
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  // Load conversations
+  useEffect(() => {
+    if (!user?.token) return;
+
+    let isMounted = true;
+    messageService.fetchConversations(user.token, targetUserId)
+      .then((data) => {
+        if (!isMounted) return;
+        setConversations(data);
+        if (data.length > 0) {
+          // If targetUserId was passed, select that partner, otherwise select first conversation
+          const matching = targetUserId ? data.find((c) => c.user?._id === targetUserId) : null;
+          setActivePartner(matching ? matching.user : data[0].user);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load conversations:", err);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.token, targetUserId]);
+
+  // Initialize Socket.io
+  useEffect(() => {
+    if (!user?.token) return;
+
+    const socket = io("http://localhost:5511", {
+      auth: { token: user.token },
+      transports: ["websocket", "polling"]
+    });
+    socketRef.current = socket;
+
+    socket.on("user_online", ({ userId }) => {
+      setOnlineUserIds((prev) => new Set([...prev, userId]));
+    });
+
+    socket.on("user_offline", ({ userId }) => {
+      setOnlineUserIds((prev) => {
+        const next = new Set(prev);
+        next.delete(userId);
+        return next;
+      });
+    });
+
+    socket.on("receive_message", (incoming) => {
+      const incomingPartnerId = incoming.sender === user._id ? incoming.receiver : incoming.sender;
+
+      setActivePartner((currentPartner) => {
+        if (currentPartner && currentPartner._id === incomingPartnerId) {
+          setMessages((prev) => {
+            // Check if duplicate
+            if (prev.some((m) => m._id === incoming._id)) return prev;
+            return [...prev, incoming];
+          });
+        }
+        return currentPartner;
+      });
+
+      // Update conversations preview
+      setConversations((prev) =>
+        prev.map((c) => {
+          if (c.user?._id === incomingPartnerId) {
+            return {
+              ...c,
+              lastMessage: incoming.content,
+              lastMessageTime: incoming.createdAt,
+              unreadCount: 0
+            };
+          }
+          return c;
+        })
+      );
+    });
+
+    socket.on("message_error", (err) => {
+      toast.error(err?.error || "Error sending message");
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [user?._id, user?.token]);
+
+  // When active partner changes, join room & fetch message history
+  useEffect(() => {
+    if (!activePartner?._id || !user?._id || !user?.token) return;
+
+    if (socketRef.current) {
+      socketRef.current.emit("join_room", {
+        senderId: user._id,
+        receiverId: activePartner._id
+      });
+    }
+
+    setLoadingHistory(true);
+    messageService.fetchMessageHistory(activePartner._id, user.token)
+      .then((history) => {
+        setMessages(history);
+        setLoadingHistory(false);
+      })
+      .catch((err) => {
+        console.error("Failed to load message history:", err);
+        setLoadingHistory(false);
+      });
+  }, [activePartner?._id, user?._id, user?.token]);
+
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    if (!newMessage.trim() || !activePartner?._id || !socketRef.current) return;
+
+    socketRef.current.emit("send_message", {
+      senderId: user._id,
+      receiverId: activePartner._id,
+      content: newMessage.trim()
+    });
+
+    setNewMessage('');
+  };
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      toast.info(`Attachment "${file.name}" selected. Sharing link via chat!`);
+      if (socketRef.current && activePartner?._id) {
+        socketRef.current.emit("send_message", {
+          senderId: user._id,
+          receiverId: activePartner._id,
+          content: `📎 Shared Document: ${file.name} (uploaded for mentorship session)`
+        });
+      }
+    }
+  };
+
+  const filteredConversations = conversations.filter((c) => {
+    const nameMatch = c.user?.name?.toLowerCase().includes(searchQuery.toLowerCase());
+    const roleMatch = c.user?.qualification?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.user?.userType?.toLowerCase().includes(searchQuery.toLowerCase());
+    const lastMsgMatch = c.lastMessage?.toLowerCase().includes(searchQuery.toLowerCase());
+    return nameMatch || roleMatch || lastMsgMatch;
+  });
+
+  const getInitials = (name) => {
+    if (!name) return 'CB';
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    return name.slice(0, 2).toUpperCase();
+  };
+
+  const formatTime = (dateStr) => {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? '' : d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const isPartnerOnline = activePartner?._id && onlineUserIds.has(activePartner._id);
 
   return (
     <div className="min-h-screen bg-parchment flex flex-col">
       <Navbar activePage="messages" />
 
       <div className="flex-1 flex">
-        <Sidebar activeTab="messages" role="student" />
+        <Sidebar activeTab="messages" role={user?.userType || 'student'} />
 
         <main className="flex-1 p-8 bg-grid-pattern overflow-y-auto flex">
           <div className="w-full bg-parchment-card border-4 border-navy rounded-3xl shadow-pop flex flex-col lg:flex-row overflow-hidden min-h-[650px]">
@@ -34,33 +211,50 @@ export default function ChatPage() {
                 <div className="font-grotesk font-extrabold text-lg text-navy mb-3">Messages & Chats</div>
                 <input
                   type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search conversations..."
                   className="w-full bg-white border-2 border-navy rounded-xl px-3 py-2 font-body text-xs text-navy shadow-pop-sm mb-4 focus:outline-none"
                 />
 
-                <div className="space-y-2">
-                  {conversations.map((c) => (
-                    <div
-                      key={c.id}
-                      className={`p-3 rounded-2xl border-2 border-navy cursor-pointer transition-all flex items-center justify-between ${c.active ? 'bg-yellow shadow-pop-sm' : 'bg-white hover:bg-parchment-dim'
-                        }`}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 rounded-xl bg-sky border-2 border-navy flex items-center justify-center font-grotesk font-extrabold text-sm text-navy shadow-pop-sm">
-                          {c.avatar}
-                        </div>
-                        <div>
-                          <div className="font-grotesk font-extrabold text-sm text-navy">{c.name}</div>
-                          <div className="font-mono text-[10px] text-navy-muted">{c.role}</div>
-                        </div>
-                      </div>
-                      {c.unread > 0 && (
-                        <span className="w-5 h-5 rounded-full bg-rust text-white font-mono text-[10px] font-bold flex items-center justify-center border border-navy">
-                          {c.unread}
-                        </span>
-                      )}
+                <div className="space-y-2 max-h-[460px] overflow-y-auto">
+                  {filteredConversations.length === 0 ? (
+                    <div className="text-center py-6 text-xs font-mono text-navy-muted">
+                      No conversations found.
                     </div>
-                  ))}
+                  ) : (
+                    filteredConversations.map((c) => {
+                      const isActive = activePartner?._id === c.user?._id;
+                      const partnerName = c.user?.name || 'Career Mentor';
+                      const partnerRole = c.user?.qualification || (c.user?.userType === 'counselor' ? 'Verified Counselor' : 'Student Peer');
+                      const avatarInitials = getInitials(partnerName);
+
+                      return (
+                        <div
+                          key={c.user?._id || Math.random()}
+                          onClick={() => setActivePartner(c.user)}
+                          className={`p-3 rounded-2xl border-2 border-navy cursor-pointer transition-all flex items-center justify-between ${
+                            isActive ? 'bg-yellow shadow-pop-sm' : 'bg-white hover:bg-parchment-dim'
+                          }`}
+                        >
+                          <div className="flex items-center space-x-3 overflow-hidden">
+                            <div className="w-10 h-10 rounded-xl bg-sky border-2 border-navy flex items-center justify-center font-grotesk font-extrabold text-sm text-navy shadow-pop-sm shrink-0">
+                              {avatarInitials}
+                            </div>
+                            <div className="truncate">
+                              <div className="font-grotesk font-extrabold text-sm text-navy truncate">{partnerName}</div>
+                              <div className="font-mono text-[10px] text-navy-muted truncate">{partnerRole}</div>
+                            </div>
+                          </div>
+                          {c.unreadCount > 0 && (
+                            <span className="w-5 h-5 rounded-full bg-rust text-white font-mono text-[10px] font-bold flex items-center justify-center border border-navy shrink-0 ml-2">
+                              {c.unreadCount}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
               </div>
 
@@ -75,44 +269,92 @@ export default function ChatPage() {
               <div className="p-4 border-b-4 border-navy bg-yellow/30 flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 rounded-xl bg-sky border-2 border-navy flex items-center justify-center font-grotesk font-extrabold text-sm text-navy">
-                    RK
+                    {getInitials(activePartner?.name)}
                   </div>
                   <div>
-                    <h2 className="font-grotesk font-extrabold text-base text-navy">Dr. Ramesh Kumar</h2>
-                    <p className="font-mono text-[10px] text-navy-muted">Online • Next Session: Tomorrow 5:00 PM IST</p>
+                    <h2 className="font-grotesk font-extrabold text-base text-navy">
+                      {activePartner?.name || 'Select a conversation'}
+                    </h2>
+                    <p className="font-mono text-[10px] text-navy-muted">
+                      {isPartnerOnline ? '🟢 Online' : '⚪ Active Mentor'} • {activePartner?.qualification || (activePartner?.userType === 'counselor' ? 'Verified Counselor' : 'CareerBridge Member')}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
                   <StatusBadge text="ACTIVE MENTORSHIP" status="success" />
-                  <Button variant="outline" size="sm">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      toast.info("Opening counselor directory for extended session booking...");
+                      navigate('/auth/counselors');
+                    }}
+                  >
                     Book Extension
                   </Button>
                 </div>
               </div>
 
               {/* Chat Messages Log */}
-              <div className="p-6 overflow-y-auto space-y-4 max-h-[460px] bg-grid-pattern">
-                {messages.map((msg) => (
-                  <ChatBubble key={msg.id} sender={msg.sender} time={msg.time} message={msg.message} isSelf={msg.isSelf} />
-                ))}
+              <div className="p-6 overflow-y-auto space-y-4 max-h-[460px] bg-grid-pattern min-h-[350px]">
+                {loadingHistory ? (
+                  <div className="flex items-center justify-center h-full">
+                    <p className="font-mono text-sm text-navy animate-pulse">Loading message history...</p>
+                  </div>
+                ) : messages.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-48 text-center">
+                    <span className="text-3xl mb-2">💬</span>
+                    <p className="font-grotesk font-bold text-navy text-sm">Start your mentorship conversation</p>
+                    <p className="font-body text-xs text-navy-muted mt-1">
+                      Say hello, share your questions, or drop a project link below!
+                    </p>
+                  </div>
+                ) : (
+                  messages.map((msg, index) => {
+                    const senderId = msg.sender?._id || msg.sender;
+                    const isSelf = senderId === user?._id;
+                    const senderName = isSelf ? (user?.name || 'You') : (activePartner?.name || 'Mentor');
+                    const timeString = formatTime(msg.createdAt);
+
+                    return (
+                      <ChatBubble
+                        key={msg._id || index}
+                        sender={senderName}
+                        time={timeString}
+                        message={msg.content}
+                        isSelf={isSelf}
+                      />
+                    );
+                  })
+                )}
+                <div ref={messagesEndRef} />
               </div>
 
               {/* Chat Input Bar */}
               <div className="p-4 border-t-4 border-navy bg-parchment">
-                <form className="flex items-center space-x-3">
+                <form onSubmit={handleSendMessage} className="flex items-center space-x-3">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
                   <button
                     type="button"
-                    className="p-2.5 bg-white border-2 border-navy rounded-xl hover:bg-parchment-dim shadow-pop-sm font-mono text-sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    title="Attach document or resume"
+                    className="p-2.5 bg-white border-2 border-navy rounded-xl hover:bg-parchment-dim shadow-pop-sm font-mono text-sm transition-all"
                   >
                     📎
                   </button>
                   <input
                     type="text"
-                    defaultValue="Thanks Dr. Ramesh! I will push the indexed MongoDB queries now."
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
                     placeholder="Type your message here..."
                     className="flex-1 bg-white border-3 border-navy rounded-xl px-4 py-2.5 font-body text-sm text-navy shadow-pop-sm focus:outline-none"
                   />
-                  <Button variant="primary" size="md">
+                  <Button variant="primary" size="md" type="submit">
                     Send Message ➔
                   </Button>
                 </form>
