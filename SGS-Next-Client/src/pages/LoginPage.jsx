@@ -1,68 +1,80 @@
 import { useEffect, useState } from 'react';
 import Header from '../components/Header';
-import Navbar from '../components/Navbar';
 import { useMutation } from '@tanstack/react-query';
 import authService from '../services/authService';
 import { useDispatch, useSelector } from 'react-redux';
-import AlertModal from '../components/AlertModal';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { setUser } from '../features/auth/authSlice';
 import LoadingScreen from '../components/LoadingScreen';
 
 export default function LoginPage() {
 
-  const { user } = useSelector(state => state.auth)
+  const { user } = useSelector(state => state.auth);
 
-  const navigate = useNavigate()
-  const dispatch = useDispatch()
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
+  const { mutate, data, isPending, isSuccess, isError, error } = useMutation({
+    mutationFn: (credentials) => authService.loginUser(credentials)
+  });
+  const [formData, setFormData] = useState({ email: "", password: "" });
 
-  const { mutate, data, isPending, isSuccess, isError, error } = useMutation({ mutationFn: (credentials) => authService.loginUser(credentials) })
-  const [formData, setFormData] = useState({ email: "", password: "" })
-
-  const { email, password } = formData
-
-
-
+  const { email, password } = formData;
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
-    })
-  }
+    });
+  };
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    mutate(formData)
-  }
+    e.preventDefault();
+    if (!email || !password) {
+      toast.error("Please enter your email and password!");
+      return;
+    }
+    mutate(formData);
+  };
+
+  const handleForgotPassword = (e) => {
+    e.preventDefault();
+    toast("To reset your password, please contact support@careerbridge.in or your college administrator.", {
+      icon: "ℹ️",
+      duration: 5000
+    });
+  };
+
+  const handleGoogleSignIn = () => {
+    toast("Google Student SSO: Direct login available. You can log in with your registered student email.", {
+      icon: "🎓",
+      duration: 4000
+    });
+  };
 
   useEffect(() => {
 
-    if (isSuccess) {
-      dispatch(setUser(data))
+    if (isSuccess && data) {
+      dispatch(setUser(data));
+      toast.success(`Welcome back, ${data.name}!`);
     }
-
 
     if (user) {
-      navigate("/auth/profile")
+      navigate("/auth/profile");
     }
 
-    if (isError) {
-      toast.error(error?.response.data.message, { position: "top-center" })
+    if (isError && error) {
+      toast.error(error?.response?.data?.message || error?.message || "Invalid credentials", { position: "top-center" });
     }
 
-
-  }, [isSuccess, isError, user, data])
-
+  }, [isSuccess, isError, user, data, error, navigate, dispatch]);
 
   if (isPending) {
     return (
       <LoadingScreen loadingMessage='Logging In...' />
-    )
+    );
   }
-
 
   return (
     <div className="min-h-screen bg-parchment flex flex-col">
@@ -106,7 +118,11 @@ export default function LoginPage() {
                 <label className="block font-grotesk font-bold text-xs uppercase tracking-wider text-navy">
                   Password
                 </label>
-                <a href="#" className="font-mono text-[11px] font-bold text-rust hover:underline">
+                <a
+                  href="#forgot"
+                  onClick={handleForgotPassword}
+                  className="font-mono text-[11px] font-bold text-rust hover:underline cursor-pointer"
+                >
                   Forgot Password?
                 </a>
               </div>
@@ -134,7 +150,7 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              className="w-full bg-yellow hover:bg-yellow-fixed text-navy font-grotesk font-extrabold text-base py-3.5 rounded-2xl border-3 border-navy shadow-pop transition-all active:translate-x-1 active:translate-y-1 active:shadow-none"
+              className="w-full bg-yellow hover:bg-yellow-fixed text-navy font-grotesk font-extrabold text-base py-3.5 rounded-2xl border-3 border-navy shadow-pop transition-all active:translate-x-1 active:translate-y-1 active:shadow-none cursor-pointer"
             >
               LOG IN TO DASHBOARD →
             </button>
@@ -149,7 +165,8 @@ export default function LoginPage() {
 
             <button
               type="button"
-              className="w-full bg-sky/30 hover:bg-sky/50 text-navy font-grotesk font-bold text-sm py-3 rounded-2xl border-3 border-navy shadow-pop-sm flex items-center justify-center space-x-2"
+              onClick={handleGoogleSignIn}
+              className="w-full bg-sky/30 hover:bg-sky/50 text-navy font-grotesk font-bold text-sm py-3 rounded-2xl border-3 border-navy shadow-pop-sm flex items-center justify-center space-x-2 cursor-pointer"
             >
               <span className="font-bold text-base">G</span>
               <span>Sign in with Google Student ID</span>
@@ -159,9 +176,9 @@ export default function LoginPage() {
           <div className="mt-8 text-center pt-4 border-t-2 border-navy/20">
             <p className="font-body text-xs text-navy">
               Don't have an account yet?{' '}
-              <a href="#" className="font-grotesk font-extrabold text-rust hover:underline">
+              <Link to="/register" className="font-grotesk font-extrabold text-rust hover:underline">
                 Create Free Student Account
-              </a>
+              </Link>
             </p>
           </div>
         </div>
