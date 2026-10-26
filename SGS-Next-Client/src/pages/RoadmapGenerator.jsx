@@ -24,7 +24,7 @@ export default function RoadmapGenerator() {
     interest: "",
     skill_level: "beginner",
     budget: "",
-    learning_mode: "",
+    learning_mode: "offline",
     additional_info: ""
   })
 
@@ -54,7 +54,7 @@ export default function RoadmapGenerator() {
     }
 
     if (isError && error) {
-      toast.error(error?.response.data.message)
+      toast.error(error?.response?.data?.message || error?.message)
     }
 
   }, [isError, error, data, isSuccess])
@@ -103,7 +103,6 @@ export default function RoadmapGenerator() {
                     </label>
                     <input
                       type="text"
-                      defaultValue=""
                       value={interest}
                       name='interest'
                       onChange={handleChange}
@@ -117,7 +116,6 @@ export default function RoadmapGenerator() {
                     </label>
                     <input
                       type="number"
-                      defaultValue=""
                       value={budget}
                       name='budget'
                       onChange={handleChange}
@@ -136,7 +134,7 @@ export default function RoadmapGenerator() {
                         value={skill_level}
                         name='skill_level'
                         onChange={handleChange} className="w-full bg-parchment border-3 border-navy rounded-xl px-3 py-2.5 font-body text-sm text-navy shadow-pop-sm focus:outline-none">
-                        <option selected value={"beginner"}>Beginner </option>
+                        <option value={"beginner"}>Beginner </option>
                         <option value={"intermediate"}>Intermediate </option>
                         <option value={"advanced"}>Advanced</option>
                       </select>
@@ -165,7 +163,6 @@ export default function RoadmapGenerator() {
                       name='additional_info'
                       onChange={handleChange}
                       rows={3}
-                      defaultValue=""
                       placeholder="Share your specific constraints..."
                       className="w-full bg-parchment border-3 border-navy rounded-xl p-4 font-body text-sm text-navy shadow-pop-sm focus:outline-none"
                     ></textarea>

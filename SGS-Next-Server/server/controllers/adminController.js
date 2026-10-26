@@ -216,9 +216,9 @@ const updateUser = async (req, res) => {
         throw new Error("User Not Exist")
     }
 
-    const updatedUser = await User.findByIdAndUpdate(user._id, { isActive: !user.isActive }, { new: true })
+    const updatedUser = await User.findByIdAndUpdate(user._id, { isActive: !user.isActive }, { returnDocument: 'after' })
 
-    if (!updateUser) {
+    if (!updatedUser) {
         res.status(409)
         throw new Error("User Not Updated!")
     }

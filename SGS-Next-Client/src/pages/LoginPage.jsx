@@ -95,7 +95,7 @@ export default function LoginPage() {
                 type="email"
                 name='email'
                 onChange={handleChange}
-                defaultValue={email}
+                value={email}
                 placeholder="e.g. aarav@example.com"
                 className="w-full bg-parchment border-3 border-navy rounded-xl px-4 py-3 font-body text-sm text-navy focus:outline-none focus:bg-white shadow-pop-sm"
               />
@@ -114,7 +114,7 @@ export default function LoginPage() {
                 type="password"
                 name='password'
                 onChange={handleChange}
-                defaultValue={password}
+                value={password}
                 placeholder="Enter your password"
                 className="w-full bg-parchment border-3 border-navy rounded-xl px-4 py-3 font-body text-sm text-navy focus:outline-none focus:bg-white shadow-pop-sm"
               />

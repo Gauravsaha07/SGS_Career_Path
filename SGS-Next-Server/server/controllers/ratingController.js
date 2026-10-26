@@ -14,7 +14,7 @@ const addRating = async (req, res) => {
 
     // Check if rating exist
 
-    let ratingExist = await Rating.findOne({ user: userId })
+    let ratingExist = await Rating.findOne({ user: userId, counselor: counselorId })
 
     if (ratingExist) {
         res.status(409)

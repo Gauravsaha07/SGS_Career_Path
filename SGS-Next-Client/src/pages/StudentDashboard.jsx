@@ -56,9 +56,9 @@ export default function StudentDashboard() {
 
 
   useEffect(() => {
-    if (user.userType === "ADMIN") {
+    if (user?.userType === "ADMIN") {
       navigate("/auth/admin")
-    } else if (user.userType === "COUNSELOR") {
+    } else if (user?.userType === "COUNSELOR") {
       navigate("/auth/counselor")
     }
   }, [user])
@@ -76,13 +76,13 @@ export default function StudentDashboard() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <div className="inline-block bg-navy text-yellow font-mono text-[10px] font-bold px-3 py-1 rounded-full uppercase mb-2">
-                  Student Workspace • {user.name}
+                  Student Workspace • {user?.name}
                 </div>
                 <h1 className="font-grotesk font-extrabold text-3xl text-navy">
-                  Namaste, {user.name}! Ready to level up? ⚡
+                  Namaste, {user?.name}! Ready to level up? ⚡
                 </h1>
                 <p className="font-body text-sm text-navy-muted mt-1">
-                  You have <span className="font-bold text-navy">{user.credits} Credits</span> available. Your current level is <span className="font-bold text-rust">{user.qualification}</span>.
+                  You have <span className="font-bold text-navy">{user?.credits} Credits</span> available. Your current level is <span className="font-bold text-rust">{user?.qualification}</span>.
                 </p>
               </div>
 

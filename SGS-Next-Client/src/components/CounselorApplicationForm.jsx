@@ -12,11 +12,17 @@ const CounselorApplicationForm = ({ categories }) => {
     const { data, isPending, isSuccess, isError, error, mutate } = useMutation({ mutationFn: (credentials) => authService.becomeCounselor(credentials) })
 
     const [formData, setFormData] = useState({
-        category: "",
-        experience: ""
+        category: categories?.[0]?._id || "",
+        experience: 3
     })
 
     const { category, experience } = formData
+
+    useEffect(() => {
+        if (categories && categories.length > 0 && !formData.category) {
+            setFormData(prev => ({ ...prev, category: categories[0]._id, experience: prev.experience || 3 }))
+        }
+    }, [categories])
 
     const handleChange = (e) => {
         setFormData({
@@ -30,12 +36,10 @@ const CounselorApplicationForm = ({ categories }) => {
 
         e.preventDefault()
 
-        console.log(formData)
-
         mutate({
             token: user.token,
-            category: category,
-            experience: experience
+            category: category || categories?.[0]?._id,
+            experience: experience || 3
         })
 
     }
@@ -43,11 +47,11 @@ const CounselorApplicationForm = ({ categories }) => {
 
     useEffect(() => {
         if (isSuccess) {
-            toast.success(data.message)
+            toast.success(data?.message || "Application submitted successfully!")
         }
 
         if (isError && error) {
-            toast.error(error)
+            toast.error(error?.response?.data?.message || error?.message || "Failed to submit application")
         }
 
     }, [data, isSuccess, isError, error])
@@ -63,7 +67,7 @@ const CounselorApplicationForm = ({ categories }) => {
                     </label>
                     <input
                         type="text"
-                        defaultValue={user.name}
+                        defaultValue={user?.name}
                         placeholder="e.g. Vikramaditya Singh"
                         className="disabled:bg-gray-200 w-full bg-parchment border-3 border-navy rounded-xl px-4 py-2.5 font-body text-sm text-navy shadow-pop-sm focus:outline-none"
                         disabled
@@ -76,7 +80,7 @@ const CounselorApplicationForm = ({ categories }) => {
                     </label>
                     <input
                         type="text"
-                        defaultValue={user.qualification}
+                        defaultValue={user?.qualification}
                         placeholder="e.g. Lead Designer @ Swiggy"
                         className="disabled:bg-gray-200 w-full bg-parchment border-3 border-navy rounded-xl px-4 py-2.5 font-body text-sm text-navy shadow-pop-sm focus:outline-none"
                         disabled
@@ -91,7 +95,7 @@ const CounselorApplicationForm = ({ categories }) => {
                     </label>
                     <input
                         type="text"
-                        defaultValue={user.email}
+                        defaultValue={user?.email}
                         placeholder="jhon@gmail.com"
                         className="disabled:bg-gray-200 w-full bg-parchment border-3 border-navy rounded-xl px-4 py-2.5 font-body text-sm text-navy shadow-pop-sm focus:outline-none"
                         disabled
@@ -116,7 +120,7 @@ const CounselorApplicationForm = ({ categories }) => {
                 </label>
                 <select name='category' value={category} onChange={handleChange} className="w-full bg-parchment border-3 border-navy rounded-xl px-3 py-2.5 font-body text-sm text-navy shadow-pop-sm focus:outline-none">
                     {
-                        categories.map(category => {
+                        categories?.map(category => {
                             return (
                                 <option key={category._id} value={category._id} >{category.title}</option>
                             )

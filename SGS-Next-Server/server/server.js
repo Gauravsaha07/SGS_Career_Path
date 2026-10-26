@@ -85,7 +85,7 @@ connectDB()
 // Socket Config
 const io = new Server(server, {
     cors: {
-        origin: process.env.CLIENT_URL || "http://localhost:5511",
+        origin: process.env.CLIENT_URL || ["http://localhost:5173", "http://localhost:5511"],
         credentials: true
     }
 })
@@ -100,7 +100,7 @@ io.on("connection", (socket) => {
 
 // Body-Parser
 app.use(express.json())
-app.use(express.urlencoded())
+app.use(express.urlencoded({ extended: true }))
 
 
 
@@ -134,6 +134,6 @@ app.use(errorHandler)
 
 
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`SERVER IS RUNNING AT PORT : ${PORT}`.bgGreen.black)
 })

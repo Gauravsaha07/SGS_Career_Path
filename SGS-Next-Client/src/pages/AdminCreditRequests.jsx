@@ -52,28 +52,28 @@ export default function AdminCreditRequests() {
 
 
   return (
-    <div class="min-h-screen bg-parchment flex flex-col">
+    <div className="min-h-screen bg-parchment flex flex-col">
       <Navbar activePage="admin" />
 
-      <div class="flex-1 flex">
+      <div className="flex-1 flex">
         <Sidebar activeTab="admin_credit_requests" role="admin" />
 
-        <main class="flex-1 p-8 bg-grid-pattern overflow-y-auto">
-          <div class="mb-8">
-            <div class="inline-block bg-yellow border-3 border-navy px-3 py-1 rounded-full shadow-pop-sm font-mono text-xs font-bold text-navy mb-2">
+        <main className="flex-1 p-8 bg-grid-pattern overflow-y-auto">
+          <div className="mb-8">
+            <div className="inline-block bg-yellow border-3 border-navy px-3 py-1 rounded-full shadow-pop-sm font-mono text-xs font-bold text-navy mb-2">
               CREDIT AUDIT
             </div>
-            <h1 class="font-grotesk font-extrabold text-3xl text-navy">
-              Manual Credit <span class="text-rust">Requests & Grants</span>
+            <h1 className="font-grotesk font-extrabold text-3xl text-navy">
+              Manual Credit <span className="text-rust">Requests & Grants</span>
             </h1>
-            <p class="font-body text-sm text-navy-muted mt-1">
+            <p className="font-body text-sm text-navy-muted mt-1">
               Approve student hardship grant requests or manual bank transfer credit additions.
             </p>
           </div>
 
-          <div class="space-y-4 max-w-4xl">
+          <div className="space-y-4 max-w-4xl">
             {pendingRequests?.map((r) => (
-              <CreditRequestCard key={r} r={r} />
+              <CreditRequestCard key={r._id} r={r} />
             ))}
           </div>
         </main>

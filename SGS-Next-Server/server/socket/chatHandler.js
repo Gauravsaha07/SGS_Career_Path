@@ -20,11 +20,11 @@ export const chatHandler = (io, socket) => {
         socket.join(room)
     })
 
-    socket.on("send_message", async(({ senderId, receiverId, content }) => {
+    socket.on("send_message", async ({ senderId, receiverId, content }) => {
         if (!content?.trim()) return
 
         try {
-            const message = Message.create({
+            const message = await Message.create({
                 sender: senderId,
                 receiver: receiverId,
                 content: content.trim()
@@ -43,19 +43,19 @@ export const chatHandler = (io, socket) => {
             socket.emit("message_error", { error: "Error is sending message" })
         }
 
-    }))
+    })
 
     socket.on("typing", ({ senderId, receiverId }) => {
         const room = `room_${[senderId, receiverId].sort().join("_")}`
         socket.to(room).emit("user_typing", { userId: senderId })
     })
 
-    socket.on("disconnet", () => {
+    socket.on("disconnect", () => {
         const sockets = onlineUsers.get(userId)
         if (sockets) {
             sockets.delete(socket.id)
         }
-        if (socket.size === 0) {
+        if (sockets && sockets.size === 0) {
             onlineUsers.delete(userId)
             io.emit("user_offline", { userId })
         }

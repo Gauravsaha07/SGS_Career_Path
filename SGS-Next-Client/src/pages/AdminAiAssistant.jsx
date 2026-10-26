@@ -46,7 +46,7 @@ export default function AdminAiAssistant() {
     }
 
     if (isError && error) {
-      toast.error(error)
+      toast.error(error?.response?.data?.message || error?.message || 'Error occurred')
     }
 
 
@@ -87,7 +87,7 @@ export default function AdminAiAssistant() {
               <input
                 onChange={(e) => setText(e.target.value)}
                 type="text"
-                defaultValue={text}
+                value={text}
                 placeholder="Type your message here..."
                 className="flex-1 bg-white border-3 border-navy rounded-xl px-4 py-2.5 font-body text-sm text-navy shadow-pop-sm focus:outline-none"
               />

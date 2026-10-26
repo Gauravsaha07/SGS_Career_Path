@@ -48,7 +48,7 @@ export default function MyCredits() {
 
               <div className="bg-parchment-card border-3 border-navy p-6 rounded-2xl shadow-pop text-center min-w-[220px]">
                 <div className="font-mono text-xs font-bold text-navy-muted uppercase">AVAILABLE BALANCE</div>
-                <div className="font-grotesk font-extrabold text-4xl text-rust mt-1">{user.credits} <span className="text-base text-navy">pts</span></div>
+                <div className="font-grotesk font-extrabold text-4xl text-rust mt-1">{user?.credits} <span className="text-base text-navy">pts</span></div>
                 <StatusBadge text="ACTIVE WALLET" status="success" />
               </div>
             </div>

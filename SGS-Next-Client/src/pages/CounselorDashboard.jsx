@@ -28,10 +28,10 @@ export default function CounselorDashboard() {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
                 <div className="inline-block bg-navy text-yellow font-mono text-[10px] font-bold px-3 py-1 rounded-full uppercase mb-2">
-                  Counselor Portal • {user.name}
+                  Counselor Portal • {user?.name}
                 </div>
                 <h1 className="font-grotesk font-extrabold text-3xl text-navy">
-                  Welcome back,{user.name} 🎓
+                  Welcome back, {user?.name} 🎓
                 </h1>
               </div>
 

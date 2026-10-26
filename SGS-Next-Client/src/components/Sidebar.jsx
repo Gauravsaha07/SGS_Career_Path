@@ -19,10 +19,10 @@ export default function Sidebar({ activeTab = 'overview', role = 'student' }) {
   ];
 
   const counselorNav = [
-    { id: 'counselor_overview', label: 'Counselor Workspace', icon: '📈' },
-    { id: 'counselor_sessions', label: 'Student Bookings', icon: '📅' },
-    { id: 'counselor_messages', label: 'Student Messages', icon: '💬' },
-    { id: 'counselor_earnings', label: 'Earnings & Credits', icon: '💰' },
+    { id: 'counselor_overview', label: 'Counselor Workspace', link: '/auth/counselor', icon: '📈' },
+    { id: 'counselor_sessions', label: 'Student Bookings', link: '/auth/counselor', icon: '📅' },
+    { id: 'counselor_messages', label: 'Student Messages', link: '/auth/counselor', icon: '💬' },
+    { id: 'counselor_earnings', label: 'Earnings & Credits', link: '/auth/counselor', icon: '💰' },
   ];
 
   const items = role === 'admin' ? adminNav : role === 'counselor' ? counselorNav : studentNav;

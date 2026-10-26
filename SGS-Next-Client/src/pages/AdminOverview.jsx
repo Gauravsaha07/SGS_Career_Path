@@ -22,9 +22,9 @@ export default function AdminOverview() {
 
 
 
-  const activeCounselors = data?.counselors.filter(item => item.status === "accepted").length
-  const pendingRequests = data?.counselors.filter(item => item.status !== "accepted")
-  const approvedCredits = data?.credits.filter(item => item.status === "granted").reduce((acc, item) => acc + item.credits, 0)
+  const activeCounselors = data?.counselors?.filter(item => item.status === "accepted")?.length || 0
+  const pendingRequests = data?.counselors?.filter(item => item.status !== "accepted") || []
+  const approvedCredits = data?.credits?.filter(item => item.status === "granted")?.reduce((acc, item) => acc + item.credits, 0) || 0
 
 
 

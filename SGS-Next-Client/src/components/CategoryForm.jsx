@@ -35,7 +35,7 @@ const CategoryForm = ({ handleShowForm }) => {
         }
 
         if (isError && error) {
-            toast.error(error)
+            toast.error(error?.response?.data?.message || error?.message || "An error occurred")
         }
 
     }, [isSuccess, isError, error, data])

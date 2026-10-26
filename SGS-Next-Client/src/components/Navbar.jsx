@@ -41,11 +41,11 @@ export default function Navbar({ activePage = 'dashboard' }) {
 
         {/* Desktop Navigation Links */}
         {
-          userType === "student" && (
+          userType?.toUpperCase() === "STUDENT" && (
             <>
               <nav className="hidden md:flex items-center space-x-2 font-grotesk font-bold text-sm">
                 <Link
-                  to="/profile"
+                  to="/auth/profile"
                   className={`px-4 py-2 rounded-full border-2 border-navy transition-all ${activePage === 'dashboard'
                     ? 'bg-yellow text-navy shadow-pop-sm font-extrabold'
                     : 'bg-parchment text-navy hover:bg-parchment-dim'
@@ -54,7 +54,7 @@ export default function Navbar({ activePage = 'dashboard' }) {
                   Dashboard
                 </Link>
                 <Link
-                  to="/careers"
+                  to="/auth/careers"
                   className={`px-4 py-2 rounded-full border-2 border-navy transition-all ${activePage === 'explorer'
                     ? 'bg-yellow text-navy shadow-pop-sm font-extrabold'
                     : 'bg-parchment text-navy hover:bg-parchment-dim'
@@ -63,7 +63,7 @@ export default function Navbar({ activePage = 'dashboard' }) {
                   Explore Careers
                 </Link>
                 <Link
-                  to="/counselors"
+                  to="/auth/counselors"
                   className={`px-4 py-2 rounded-full border-2 border-navy transition-all ${activePage === 'counselors'
                     ? 'bg-yellow text-navy shadow-pop-sm font-extrabold'
                     : 'bg-parchment text-navy hover:bg-parchment-dim'
@@ -72,7 +72,7 @@ export default function Navbar({ activePage = 'dashboard' }) {
                   Find Counselor
                 </Link>
                 <Link
-                  to="/ai-roadmap"
+                  to="/auth/ai-roadmap"
                   className={`px-4 py-2 rounded-full border-2 border-navy transition-all ${activePage === 'roadmap'
                     ? 'bg-yellow text-navy shadow-pop-sm font-extrabold'
                     : 'bg-parchment text-navy hover:bg-parchment-dim'
@@ -89,7 +89,7 @@ export default function Navbar({ activePage = 'dashboard' }) {
         <div className="flex items-center space-x-3">
           {/* Credits Badge */}
           {
-            userType === "student" && (
+            userType?.toUpperCase() === "STUDENT" && (
               <a
                 href="#"
                 className="flex items-center space-x-2 bg-rust-container border-2 border-navy px-3 py-1.5 rounded-full shadow-pop-sm hover:bg-rust-container/80 transition-all"
@@ -108,7 +108,7 @@ export default function Navbar({ activePage = 'dashboard' }) {
             className="flex items-center space-x-2 bg-sky/30 border-2 border-navy px-2.5 py-1 rounded-full shadow-pop-sm hover:bg-sky/50"
           >
             <div className="w-7 h-7 rounded-full bg-sky border border-navy flex items-center justify-center font-grotesk font-bold text-xs text-navy">
-              {user.name[0]}
+              {user?.name ? user.name[0] : ''}
             </div>
             <span className="hidden sm:inline font-grotesk font-bold text-xs text-navy">
               {user?.name}

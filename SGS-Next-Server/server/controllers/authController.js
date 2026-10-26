@@ -37,6 +37,10 @@ const registerUser = async (req, res) => {
     // TODO : FIX UPLOAD IMAGE BUG
 
     // Upload to cloudinary
+    if (!req.file) {
+        res.status(409)
+        throw new Error("Please Upload Profile Picture!")
+    }
     let uploadResult = await uploadToCloudinary(req.file.path)
     // Remove From Server
     fs.unlinkSync(req.file.path)
@@ -84,6 +88,11 @@ const loginUser = async (req, res) => {
     }
 
     const user = await User.findOne({ email })
+
+    if (!user) {
+        res.status(401)
+        throw new Error("Invalid Credentials")
+    }
 
     if (!user.isActive) {
         res.status(401)

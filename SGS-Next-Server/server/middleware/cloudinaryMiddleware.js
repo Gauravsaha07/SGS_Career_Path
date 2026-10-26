@@ -1,7 +1,5 @@
 import { v2 as cloudinary } from "cloudinary";
 import fs from "node:fs"
-import dotenv from "dotenv"
-dotenv.config();
 
 // Configuration
 cloudinary.config({
@@ -27,7 +25,6 @@ const uploadToCloudinary = async (fileLink) => {
       fs.unlinkSync(fileLink)
     });
   return uploadResult
-console.log("Upload Result:", uploadResult);
 }
 
 export default uploadToCloudinary

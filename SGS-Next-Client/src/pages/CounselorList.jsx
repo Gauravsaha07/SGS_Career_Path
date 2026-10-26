@@ -35,7 +35,7 @@ export default function CounselorList() {
 
   if (isError && error) {
     return (
-      <AlertModal type='error' open={true} title={"Error Occured"} message={isError && error} onConfirm={() => navigate("/auth/profile")} onClose={() => navigate("/")} />
+      <AlertModal type='error' open={true} title={"Error Occured"} message={error?.response?.data?.message || error?.message || "An error occurred"} onConfirm={() => navigate("/auth/profile")} onClose={() => navigate("/")} />
     )
   }
 
@@ -79,24 +79,24 @@ export default function CounselorList() {
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex items-center space-x-4">
                           <div className="w-14 h-14 rounded-2xl bg-yellow border-3 border-navy flex items-center justify-center font-grotesk font-extrabold text-xl text-navy shadow-pop-sm">
-                            <img className='w-14 h-14 rounded-2xl bg-yellow border-3 border-navy flex items-center justify-center font-grotesk font-extrabold text-xl text-navy shadow-pop-sm' src={counselor.user.profilePic} alt="" />
+                            <img className='w-14 h-14 rounded-2xl bg-yellow border-3 border-navy flex items-center justify-center font-grotesk font-extrabold text-xl text-navy shadow-pop-sm' src={counselor.user?.profilePic} alt="" />
                           </div>
                           <div>
                             <div className="flex items-center space-x-2">
-                              <h3 className="font-grotesk font-extrabold text-lg text-navy">{counselor.user.name}</h3>
-                              <StatusBadge text={counselor.isAvailable} status="success" />
+                              <h3 className="font-grotesk font-extrabold text-lg text-navy">{counselor.user?.name}</h3>
+                              <StatusBadge text={counselor.isAvailable ? "Available" : "Busy"} status="success" />
                             </div>
                             <p className="font-mono text-xs font-bold text-navy-muted">{counselor.title}</p>
                             <div className="flex items-center space-x-3 mt-1 text-xs font-mono">
                               <span className="text-rust font-bold">{5}</span>
-                              <span className="text-navy-muted">• {counselor.category.title}</span>
+                              <span className="text-navy-muted">• {counselor.category?.title}</span>
                             </div>
                           </div>
                         </div>
                       </div>
 
                       <p className="font-body text-xs text-navy mb-4 bg-parchment p-3 rounded-xl">
-                        Location : {counselor.user.location}
+                        Location : {counselor.user?.location}
                       </p>
 
 
@@ -104,7 +104,7 @@ export default function CounselorList() {
                         <div className="font-grotesk font-bold text-xs text-navy mb-2">Qualifications : </div>
                         <div className="flex flex-wrap gap-1.5">
                           <span className="bg-sky/20 border border-navy text-navy font-mono text-[10px] font-bold px-2.5 py-0.5 rounded-full">
-                            {counselor.user.qualification}
+                            {counselor.user?.qualification}
                           </span>
 
                         </div>

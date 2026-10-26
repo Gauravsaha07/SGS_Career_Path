@@ -24,11 +24,8 @@ export const generateRoadmap = async (req, res) => {
 
     if (user.credits < 1) {
       res.status(401)
-      throw new Error("Inssufficeint Credits!")
+      throw new Error("Insufficient Credits!")
     }
-
-    let updatedUser = await User.findByIdAndUpdate(user._id, { credits: user.credits - 1 }, { new: true })
-
 
     const { name, email, qualification, location } = user
     const { interest, skill_level, budget, learning_mode, additional_info } = req.body
@@ -37,6 +34,8 @@ export const generateRoadmap = async (req, res) => {
       res.status(409)
       throw new Error("Please Fill All Details!")
     }
+
+    let updatedUser = await User.findByIdAndUpdate(user._id, { credits: user.credits - 1 }, { returnDocument: 'after' })
 
 
 
@@ -186,7 +185,8 @@ account on X and complete the first module").
     })
 
   } catch (error) {
-    res.status(409)
+    const statusCode = res.statusCode && res.statusCode !== 200 ? res.statusCode : 409
+    res.status(statusCode)
     throw new Error(error.message)
   }
 
