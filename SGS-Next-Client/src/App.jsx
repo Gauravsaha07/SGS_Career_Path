@@ -17,6 +17,8 @@ import RoadmapResult from './pages/RoadmapResult';
 import MyCredits from './pages/MyCredits';
 import BecomeCounselor from './pages/BecomeCounselor';
 import CounselorDashboard from './pages/CounselorDashboard';
+import CounselorBookings from './pages/CounselorBookings';
+import CounselorEarnings from './pages/CounselorEarnings';
 import AdminOverview from './pages/AdminOverview';
 import AdminUsers from './pages/AdminUsers';
 import AdminCategories from './pages/AdminCategories';
@@ -56,6 +58,8 @@ export default function App() {
             <Route path='admin/credit_requests' element={<AdminCreditRequests />} />
             <Route path='admin/ai' element={<AdminAiAssistant />} />
             <Route path='counselor' element={<CounselorDashboard />} />
+            <Route path='counselor/bookings' element={<CounselorBookings />} />
+            <Route path='counselor/earnings' element={<CounselorEarnings />} />
             <Route path='profile' element={<StudentDashboard />} />
             <Route path='profile/become-counselor' element={<BecomeCounselor />} />
             <Route path='profile/my-credits' element={<MyCredits />} />

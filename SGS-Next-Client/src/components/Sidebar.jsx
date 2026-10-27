@@ -32,9 +32,9 @@ export default function Sidebar({ activeTab = 'overview', role }) {
 
   const counselorNav = [
     { id: 'counselor_overview', label: 'Counselor Workspace', link: '/auth/counselor', icon: '📈' },
-    { id: 'counselor_sessions', label: 'Student Bookings', link: '/auth/counselor', icon: '📅' },
+    { id: 'counselor_sessions', label: 'Student Bookings', link: '/auth/counselor/bookings', icon: '📅' },
     { id: 'counselor_messages', label: 'Student Messages', link: '/auth/profile/chat', icon: '💬' },
-    { id: 'counselor_earnings', label: 'Earnings & Credits', link: '/auth/counselor', icon: '💰' },
+    { id: 'counselor_earnings', label: 'Earnings & Credits', link: '/auth/counselor/earnings', icon: '💰' },
   ];
 
   const items = effectiveRole === 'admin'
@@ -45,9 +45,10 @@ export default function Sidebar({ activeTab = 'overview', role }) {
 
   const isTabActive = (item) => {
     if (activeTab === item.id) return true;
-    if (item.id === 'counselor_messages' && (activeTab === 'messages' || activeTab === 'chat')) return true;
-    if (item.id === 'counselor_earnings' && activeTab === 'credits') return true;
-    if (item.id === 'messages' && (activeTab === 'counselor_messages' || activeTab === 'chat')) return true;
+    if (item.id === 'counselor_sessions' && (activeTab === 'counselor_bookings' || activeTab === 'counselor_sessions')) return true;
+    if (item.id === 'counselor_earnings' && (activeTab === 'counselor_earnings' || activeTab === 'credits' || activeTab === 'earnings')) return true;
+    if (item.id === 'counselor_messages' && (activeTab === 'messages' || activeTab === 'chat' || activeTab === 'counselor_messages')) return true;
+    if (item.id === 'messages' && (activeTab === 'counselor_messages' || activeTab === 'chat' || activeTab === 'messages')) return true;
     return false;
   };
 

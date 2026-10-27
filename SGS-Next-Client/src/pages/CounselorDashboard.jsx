@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Navigate, Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 import Card from '../components/Card';
@@ -77,14 +78,22 @@ export default function CounselorDashboard() {
     toast.info("Reschedule proposal sent to student via chat.");
   };
 
+  const userRole = (user?.userType || '').toUpperCase();
+  if (userRole === 'STUDENT') {
+    return <Navigate to="/auth/profile" replace />;
+  }
+  if (userRole === 'ADMIN') {
+    return <Navigate to="/auth/admin" replace />;
+  }
+
   if (isLoading) {
     return <LoadingScreen loadingMessage="Loading Counselor Workspace..." />;
   }
 
   const bookingsList = workspace?.bookings || [];
-  const totalCalls = workspace?.totalCalls || bookingsList.length;
+  const totalCalls = workspace?.totalCalls ?? bookingsList.length;
   const avgRating = workspace?.avgRating || "5.0";
-  const creditsEarned = workspace?.creditsEarned ?? user?.credits ?? 0;
+  const creditsEarned = workspace?.creditsEarned ?? 0;
   const earningsINR = workspace?.earningsINR ?? (creditsEarned * 10);
 
   return (

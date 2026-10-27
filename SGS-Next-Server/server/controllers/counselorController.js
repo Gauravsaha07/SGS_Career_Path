@@ -222,8 +222,9 @@ const getCounselorWorkspace = async (req, res) => {
                 ratings: [],
                 avgRating: "5.0",
                 totalCalls: 0,
-                creditsEarned: req.user.credits || 0,
-                earningsINR: (req.user.credits || 0) * 10
+                creditsEarned: 0,
+                earningsINR: 0,
+                walletCredits: req.user.credits || 0
             });
         }
 
@@ -237,6 +238,8 @@ const getCounselorWorkspace = async (req, res) => {
             ? counselor.availableSlots
             : DEFAULT_SLOTS;
 
+        const sessionCredits = bookings.reduce((sum, b) => sum + (b.fee || 50), 0);
+
         res.status(200).json({
             counselorId: counselor._id,
             status: counselor.status,
@@ -245,8 +248,9 @@ const getCounselorWorkspace = async (req, res) => {
             ratings,
             avgRating,
             totalCalls: bookings.length,
-            creditsEarned: req.user.credits || (bookings.length * 50),
-            earningsINR: (req.user.credits || (bookings.length * 50)) * 10
+            creditsEarned: sessionCredits,
+            earningsINR: sessionCredits * 10,
+            walletCredits: req.user.credits || 0
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
