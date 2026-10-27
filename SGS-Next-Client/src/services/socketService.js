@@ -22,7 +22,7 @@ export const getSocket = (token) => {
   }
 
   currentToken = token;
-  socketInstance = io("http://localhost:5511", {
+  socketInstance = io(import.meta.env.VITE_SOCKET_URL || "http://localhost:5511", {
     auth: { token },
     transports: ["websocket", "polling"],
     reconnection: true,
