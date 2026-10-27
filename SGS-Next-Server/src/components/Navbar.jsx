@@ -2,7 +2,6 @@ export default function Navbar({ activePage = 'dashboard' }) {
   return (
     <header class="w-full bg-parchment-card border-b-4 border-navy px-4 lg:px-8 py-3 sticky top-0 z-40">
       <div class="max-w-7xl mx-auto flex items-center justify-between">
-        {/* Brand Logo */}
         <div class="flex items-center space-x-3">
           <a href="#" class="flex items-center space-x-2 group">
             <div class="w-10 h-10 bg-yellow border-3 border-navy shadow-pop flex items-center justify-center font-grotesk font-extrabold text-xl text-navy">
@@ -19,7 +18,6 @@ export default function Navbar({ activePage = 'dashboard' }) {
           </a>
         </div>
 
-        {/* Desktop Navigation Links */}
         <nav class="hidden md:flex items-center space-x-2 font-grotesk font-bold text-sm">
           <a
             href="#"
@@ -63,9 +61,7 @@ export default function Navbar({ activePage = 'dashboard' }) {
           </a>
         </nav>
 
-        {/* Right Widgets: Credits & Profile */}
         <div class="flex items-center space-x-3">
-          {/* Credits Badge */}
           <a
             href="#"
             class="flex items-center space-x-2 bg-rust-container border-2 border-navy px-3 py-1.5 rounded-full shadow-pop-sm hover:bg-rust-container/80 transition-all"
@@ -77,7 +73,6 @@ export default function Navbar({ activePage = 'dashboard' }) {
             </span>
           </a>
 
-          {/* User Profile Avatar */}
           <a
             href="#"
             class="flex items-center space-x-2 bg-sky/30 border-2 border-navy px-2.5 py-1 rounded-full shadow-pop-sm hover:bg-sky/50"

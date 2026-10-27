@@ -7,7 +7,6 @@ export default function LoginPage() {
 
       <main class="flex-1 flex items-center justify-center p-6 bg-grid-pattern">
         <div class="w-full max-w-md bg-parchment-card border-4 border-navy rounded-3xl p-8 shadow-pop-lg relative overflow-hidden">
-          {/* Decorative Sticker Badge */}
           <div class="absolute -top-3 -right-3 bg-rust text-white font-mono text-[10px] font-bold uppercase tracking-widest px-3 py-1 border-2 border-navy rotate-6 shadow-pop-sm">
             Student Portal
           </div>

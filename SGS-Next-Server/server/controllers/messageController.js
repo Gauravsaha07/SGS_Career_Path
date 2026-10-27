@@ -2,15 +2,11 @@ import Message from "../models/messageModel.js";
 import User from "../models/userModel.js";
 import Counselor from "../models/counselorModel.js";
 
-// @desc Get active chat conversations for logged-in user
-// @route GET /api/messages/conversations
-// @access Private
 export const getConversations = async (req, res) => {
     try {
         const currentUserId = req.user.id;
         const currentUserType = (req.user.userType || '').toUpperCase();
 
-        // Find all messages involving the current user
         const messages = await Message.find({
             $or: [{ sender: currentUserId }, { receiver: currentUserId }]
         }).sort({ createdAt: -1 });
@@ -32,7 +28,6 @@ export const getConversations = async (req, res) => {
             }
         }
 
-        // Fetch partner user profiles
         const partnerIds = Array.from(partnersMap.keys());
         const users = await User.find({ _id: { $in: partnerIds } }).select("name email profilePic userType qualification location");
 
@@ -46,7 +41,6 @@ export const getConversations = async (req, res) => {
             };
         });
 
-        // For counselors: ensure any students who booked a session with this counselor appear in their conversations list
         if (currentUserType === "COUNSELOR") {
             const counselorDoc = await Counselor.findOne({ user: currentUserId }).populate("bookings.student", "name email profilePic userType qualification location");
             if (counselorDoc && counselorDoc.bookings) {
@@ -63,7 +57,6 @@ export const getConversations = async (req, res) => {
             }
         }
 
-        // If targetUserId passed in query and not yet in conversationList, prepend them
         const targetUserId = req.query.targetUserId;
         if (targetUserId && targetUserId !== currentUserId && !conversationList.some(c => c.user?._id?.toString() === targetUserId)) {
             const targetUser = await User.findById(targetUserId).select("name email profilePic userType qualification location");
@@ -84,9 +77,6 @@ export const getConversations = async (req, res) => {
     }
 };
 
-// @desc Get message history between logged-in user and another user
-// @route GET /api/messages/:otherUserId
-// @access Private
 export const getMessageHistory = async (req, res) => {
     try {
         const currentUserId = req.user.id;
@@ -99,7 +89,6 @@ export const getMessageHistory = async (req, res) => {
             ]
         }).sort({ createdAt: 1 }).populate("sender", "name profilePic").populate("receiver", "name profilePic");
 
-        // Mark incoming messages as read
         await Message.updateMany(
             { sender: otherUserId, receiver: currentUserId, isRead: false },
             { $set: { isRead: true } }

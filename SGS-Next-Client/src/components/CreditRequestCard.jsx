@@ -49,7 +49,6 @@ const CreditRequestCard = ({ r }) => {
                     <StatusBadge text={r.credits} status="success" />
                 </div>
                 <p className="font-mono text-xs text-navy-muted">{r.user?.location} • {new Date(r.createdAt).toLocaleDateString('en-IN')}</p>
-                {/* <p className="font-body text-xs text-navy mt-1">Reason: "{r.reason}"</p> */}
             </div>
 
             <div className="flex space-x-3 w-full md:w-auto">

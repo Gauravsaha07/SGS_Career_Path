@@ -7,7 +7,6 @@ import { Server } from "socket.io";
 import socketAuthMiddleware from "./socket/socketAuth.js";
 import { chatHandler } from "./socket/chatHandler.js"
 
-// Local Imports
 import connectDB from "./config/dbConfig.js"
 import authRoutes from "./routes/authRoutes.js"
 import adminRoutes from "./routes/adminRoutes.js"

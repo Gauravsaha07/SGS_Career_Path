@@ -27,7 +27,6 @@ export default function CareerExplorer() {
     queryFn: () => authService.fetchQueries()
   });
 
-  // Client-side filtering across title, skills, description, category, and salary
   const filteredCareers = (careers || []).filter((career) => {
     const matchesSearch =
       !search ||
@@ -61,7 +60,6 @@ export default function CareerExplorer() {
         <Sidebar activeTab="explorer" role="student" />
 
         <main className="flex-1 p-8 bg-grid-pattern overflow-y-auto">
-          {/* Header Banner */}
           <div className="mb-8">
             <div className="inline-block bg-yellow border-3 border-navy px-3 py-1 rounded-full shadow-pop-sm font-mono text-xs font-bold text-navy mb-2">
               CAREER DIRECTORY 2026
@@ -74,7 +72,6 @@ export default function CareerExplorer() {
             </p>
           </div>
 
-          {/* Search & Filter Bar */}
           <div className="bg-parchment-card border-4 border-navy rounded-3xl p-6 shadow-pop mb-8">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="md:col-span-2">
@@ -126,7 +123,6 @@ export default function CareerExplorer() {
             </div>
           </div>
 
-          {/* Careers Grid */}
           {filteredCareers.length === 0 ? (
             <div className="bg-parchment-card border-4 border-navy rounded-3xl p-12 text-center shadow-pop">
               <div className="text-4xl mb-3">🔍</div>

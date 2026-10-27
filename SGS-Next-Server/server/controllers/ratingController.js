@@ -12,7 +12,6 @@ const addRating = async (req, res) => {
         throw new Error("Please Fill All Details..")
     }
 
-    // Check if rating exist
 
     let ratingExist = await Rating.findOne({ user: userId, counselor: counselorId })
 

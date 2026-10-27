@@ -54,7 +54,6 @@ const becomeCounselor = async (req, res) => {
                 counselor: existing
             });
         }
-        // If rejected, allow re-application by updating existing record back to pending
         existing.category = category;
         existing.categoryTitle = categoryExist.title;
         existing.experience = Number(experience);
@@ -116,13 +115,11 @@ const getActiveCounselors = async (req, res) => {
         throw new Error("Counselors Not Found!");
     }
 
-    // Filter out ghost orphans: must be accepted AND have either a linked user or a direct name
     const activeCounselors = counselors.filter(cn =>
         cn.status === "accepted" &&
         (cn.user != null || (cn.name && cn.name.trim().length > 0))
     );
 
-    // Augment with average rating and fallback fields
     const counselorsWithRating = await Promise.all(activeCounselors.map(async (cn) => {
         const ratings = await Rating.find({ counselor: cn._id });
         const avg = ratings.length > 0
@@ -193,23 +190,19 @@ const bookCounselorSession = async (req, res) => {
     const slot = req.body?.slot || "Upcoming Available Slot";
     const topic = req.body?.topic || "1-on-1 Mentorship & Career Guidance";
 
-    // Deduct from student
     student.credits -= sessionFee;
     await student.save();
 
-    // Credit to counselor user
     if (counselor.user) {
         await User.findByIdAndUpdate(counselor.user._id, { $inc: { credits: sessionFee } });
     }
 
-    // Record credit transaction
     await Credit.create({
         user: student._id,
         credits: -sessionFee,
         status: "granted"
     });
 
-    // Record booking in counselor
     counselor.bookings.push({
         student: student._id,
         studentName: student.name,
@@ -222,7 +215,6 @@ const bookCounselorSession = async (req, res) => {
     });
     await counselor.save();
 
-    // Create introductory message so both parties immediately have an active conversation in chat
     if (counselor.user && counselor.user._id.toString() !== student._id.toString()) {
         await Message.create({
             sender: student._id,

@@ -52,7 +52,6 @@ export default function AdminUsers() {
         <Sidebar activeTab="admin_users" role="admin" />
 
         <main className="flex-1 p-8 bg-grid-pattern overflow-y-auto">
-          {/* Header */}
           <div className="mb-8">
             <div className="inline-block bg-yellow border-3 border-navy px-3 py-1 rounded-full shadow-pop-sm font-mono text-xs font-bold text-navy mb-2">
               USER MANAGEMENT
@@ -64,8 +63,6 @@ export default function AdminUsers() {
               Search, filter, inspect, and manage active student and counselor accounts across India.
             </p>
           </div>
-
-          {/* Users Table */}
           <div className="bg-parchment-card border-4 border-navy rounded-3xl p-6 shadow-pop">
             <div className="overflow-x-auto">
               <table className="w-full text-left font-body text-xs">

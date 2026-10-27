@@ -75,7 +75,6 @@ export default function RoadmapResult() {
     });
   };
 
-  // Standard fallback phases if roadmap has plain text
   const defaultPhases = [
     {
       phase: 'Phase 1 (Month 1-2)',
@@ -173,7 +172,6 @@ export default function RoadmapResult() {
         <Sidebar activeTab="roadmap" role="student" />
 
         <main className="flex-1 p-8 bg-grid-pattern overflow-y-auto">
-          {/* Roadmap Switcher if multiple exist */}
           {roadmaps.length > 1 && (
             <div className="mb-6 flex flex-wrap gap-2 items-center">
               <span className="font-mono text-xs font-bold text-navy uppercase mr-2">Your Roadmaps:</span>
@@ -193,7 +191,6 @@ export default function RoadmapResult() {
             </div>
           )}
 
-          {/* Header Banner */}
           <div className="bg-yellow border-4 border-navy rounded-3xl p-8 shadow-pop mb-8 relative">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
@@ -234,7 +231,6 @@ export default function RoadmapResult() {
             </div>
           </div>
 
-          {/* AI Output Overview Card if text available */}
           {activeRoadmap?.text && (
             <div className="bg-parchment-card border-4 border-navy rounded-3xl p-6 shadow-pop mb-8 max-w-5xl">
               <h2 className="font-grotesk font-extrabold text-lg text-navy mb-2">Detailed Curriculum & Advisor Guidance</h2>
@@ -244,7 +240,6 @@ export default function RoadmapResult() {
             </div>
           )}
 
-          {/* Timeline Phases */}
           <div className="space-y-6 max-w-5xl">
             {defaultPhases.map((p, idx) => {
               const phaseNum = idx + 1;
@@ -252,7 +247,6 @@ export default function RoadmapResult() {
 
               return (
                 <div key={idx} className="bg-parchment-card border-4 border-navy rounded-3xl p-6 shadow-pop relative">
-                  {/* Connecting Line Indicator */}
                   {idx < defaultPhases.length - 1 && (
                     <div className="hidden lg:block absolute left-8 -bottom-7 w-1 h-7 bg-navy"></div>
                   )}

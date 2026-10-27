@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 
-// Import all page screens
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -31,7 +30,6 @@ import NotFoundPage from './pages/NotFoundPage';
 
 export default function App() {
 
-  // Create a client with optimized caching & no duplicate window focus refetches
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {

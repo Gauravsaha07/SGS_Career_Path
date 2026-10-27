@@ -29,7 +29,6 @@ export default function ChatPage() {
 
   const targetUserId = location.state?.targetUserId;
 
-  // Auto-scroll to bottom of chat
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -38,7 +37,6 @@ export default function ChatPage() {
     scrollToBottom();
   }, [messages]);
 
-  // Load conversations
   useEffect(() => {
     if (!user?.token) return;
 
@@ -61,7 +59,6 @@ export default function ChatPage() {
     };
   }, [user?.token, targetUserId]);
 
-  // Connect & manage Socket.io singleton lifecycle
   useEffect(() => {
     if (!user?.token) return;
 
@@ -126,7 +123,6 @@ export default function ChatPage() {
     };
   }, [user?._id, user?.token]);
 
-  // When active partner changes, join room & fetch message history
   useEffect(() => {
     if (!activePartner?._id || !user?._id || !user?.token) return;
 
@@ -234,7 +230,6 @@ export default function ChatPage() {
 
         <main className="flex-1 p-8 bg-grid-pattern overflow-y-auto flex">
           <div className="w-full bg-parchment-card border-4 border-navy rounded-3xl shadow-pop flex flex-col lg:flex-row overflow-hidden min-h-[650px]">
-            {/* Left Chat Sidebar */}
             <div className="w-full lg:w-80 border-b-4 lg:border-b-0 lg:border-r-4 border-navy bg-parchment p-4 flex flex-col justify-between">
               <div>
                 <div className="font-grotesk font-extrabold text-lg text-navy mb-3">Messages & Chats</div>
@@ -297,9 +292,7 @@ export default function ChatPage() {
               </div>
             </div>
 
-            {/* Right Main Chat Window */}
             <div className="flex-1 flex flex-col justify-between bg-parchment-card">
-              {/* Chat Window Header */}
               <div className="p-4 border-b-4 border-navy bg-yellow/30 flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 rounded-xl bg-sky border-2 border-navy flex items-center justify-center font-grotesk font-extrabold text-sm text-navy overflow-hidden shrink-0">
@@ -338,7 +331,6 @@ export default function ChatPage() {
                 </div>
               </div>
 
-              {/* Chat Messages Log */}
               <div className="p-6 overflow-y-auto space-y-4 max-h-[460px] bg-grid-pattern min-h-[350px]">
                 {loadingHistory ? (
                   <div className="flex items-center justify-center h-full">
@@ -373,7 +365,6 @@ export default function ChatPage() {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Chat Input Bar */}
               <div className="p-4 border-t-4 border-navy bg-parchment">
                 <form onSubmit={handleSendMessage} className="flex items-center space-x-3">
                   <input

@@ -29,7 +29,6 @@ export default function Sidebar({ activeTab = 'overview', role = 'student' }) {
   return (
     <aside class="w-64 bg-parchment-card border-r-4 border-navy p-4 flex flex-col justify-between min-h-[calc(100vh-65px)]">
       <div class="space-y-6">
-        {/* Role Badge */}
         <div class="bg-yellow border-2 border-navy p-3 shadow-pop-sm flex items-center justify-between">
           <div>
             <div class="font-mono text-[10px] font-bold text-navy-muted uppercase">Workspace Mode</div>
@@ -40,7 +39,6 @@ export default function Sidebar({ activeTab = 'overview', role = 'student' }) {
           </span>
         </div>
 
-        {/* Navigation Items */}
         <nav class="space-y-2">
           {items.map((item) => (
             <a
@@ -59,7 +57,6 @@ export default function Sidebar({ activeTab = 'overview', role = 'student' }) {
         </nav>
       </div>
 
-      {/* Footer info box */}
       <div class="bg-rust-container border-2 border-navy p-3 text-xs space-y-1">
         <div class="font-grotesk font-extrabold text-navy">Workshop Scaffold</div>
         <p class="font-mono text-[10px] text-navy-muted">Static UI Template for API integration practice.</p>

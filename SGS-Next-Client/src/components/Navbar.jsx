@@ -24,7 +24,6 @@ export default function Navbar({ activePage = 'dashboard' }) {
   return (
     <header className="w-full bg-parchment-card border-b-4 border-navy px-4 lg:px-8 py-3 sticky top-0 z-40">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
-        {/* Brand Logo */}
         <div className="flex items-center space-x-3">
           <Link to="/" className="flex items-center space-x-2 group">
             <div className="w-10 h-10 bg-yellow border-3 border-navy shadow-pop flex items-center justify-center font-grotesk font-extrabold text-xl text-navy">
@@ -41,7 +40,6 @@ export default function Navbar({ activePage = 'dashboard' }) {
           </Link>
         </div>
 
-        {/* Desktop Navigation Links */}
         {
           userType?.toUpperCase() === "STUDENT" && (
             <>
@@ -87,9 +85,7 @@ export default function Navbar({ activePage = 'dashboard' }) {
           )
         }
 
-        {/* Right Widgets: Credits & Profile */}
         <div className="flex items-center space-x-3">
-          {/* Credits Badge */}
           {
             userType?.toUpperCase() === "STUDENT" && (
               <Link
@@ -105,7 +101,6 @@ export default function Navbar({ activePage = 'dashboard' }) {
             )
           }
 
-          {/* User Profile Avatar */}
           <div
             className="flex items-center space-x-2 bg-sky/30 border-2 border-navy px-2.5 py-1 rounded-full shadow-pop-sm hover:bg-sky/50"
           >

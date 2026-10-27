@@ -32,7 +32,6 @@ const counselorSchema = new mongoose.Schema({
         ref: "User",
         required: false
     },
-    // Fallback fields for direct MongoDB insertions
     name: { type: String, trim: true },
     email: { type: String, trim: true },
     phone: { type: String, trim: true },

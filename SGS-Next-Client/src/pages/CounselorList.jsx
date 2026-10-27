@@ -57,7 +57,6 @@ export default function CounselorList() {
         <Sidebar activeTab="counselors" role="student" />
 
         <main className="flex-1 p-8 bg-grid-pattern overflow-y-auto">
-          {/* Header Banner */}
           <div className="mb-8">
             <div className="inline-block bg-yellow border-3 border-navy px-3 py-1 rounded-full shadow-pop-sm font-mono text-xs font-bold text-navy mb-2">
               VERIFIED MENTORS DIRECTORY
@@ -70,7 +69,6 @@ export default function CounselorList() {
             </p>
           </div>
 
-          {/* Counselors Grid */}
           {counselors && counselors.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {counselors.map((counselor) => {

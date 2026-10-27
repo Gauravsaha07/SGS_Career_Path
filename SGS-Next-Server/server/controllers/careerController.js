@@ -1,8 +1,5 @@
 import Career from "../models/careerModel.js";
 
-// @desc Get all careers (with optional search, category, and salary filter)
-// @route GET /api/careers
-// @access Public / Student
 export const getAllCareers = async (req, res) => {
     try {
         const { search, category, salary } = req.query;
@@ -28,9 +25,6 @@ export const getAllCareers = async (req, res) => {
     }
 };
 
-// @desc Get single career by ID
-// @route GET /api/careers/:id
-// @access Public / Student
 export const getCareerById = async (req, res) => {
     try {
         const career = await Career.findById(req.params.id).populate("category");

@@ -20,7 +20,6 @@ export default function AdminUsers() {
         <Sidebar activeTab="admin_users" role="admin" />
 
         <main class="flex-1 p-8 bg-grid-pattern overflow-y-auto">
-          {/* Header */}
           <div class="mb-8">
             <div class="inline-block bg-yellow border-3 border-navy px-3 py-1 rounded-full shadow-pop-sm font-mono text-xs font-bold text-navy mb-2">
               USER MANAGEMENT
@@ -33,7 +32,6 @@ export default function AdminUsers() {
             </p>
           </div>
 
-          {/* Search Filter Bar */}
           <div class="bg-parchment-card border-4 border-navy rounded-3xl p-6 shadow-pop mb-8">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div class="md:col-span-2">
@@ -60,7 +58,6 @@ export default function AdminUsers() {
             </div>
           </div>
 
-          {/* Users Table */}
           <div class="bg-parchment-card border-4 border-navy rounded-3xl p-6 shadow-pop">
             <div class="overflow-x-auto">
               <table class="w-full text-left font-body text-xs">

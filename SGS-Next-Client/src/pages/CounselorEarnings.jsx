@@ -50,7 +50,6 @@ export default function CounselorEarnings() {
         <Sidebar activeTab="counselor_earnings" role="counselor" />
 
         <main className="flex-1 p-8 bg-grid-pattern overflow-y-auto">
-          {/* Header Banner */}
           <div className="bg-yellow border-4 border-navy rounded-3xl p-6 shadow-pop mb-8">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
@@ -78,7 +77,6 @@ export default function CounselorEarnings() {
             </div>
           </div>
 
-          {/* 4 Financial Metrics Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <Card color="white">
               <div className="font-mono text-xs font-bold text-navy-muted uppercase">Sessions Completed</div>
@@ -107,7 +105,6 @@ export default function CounselorEarnings() {
             </Card>
           </div>
 
-          {/* Main Content: Breakdown & Payout Policies */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
               <div className="bg-parchment-card border-4 border-navy rounded-3xl p-6 shadow-pop">
@@ -171,7 +168,6 @@ export default function CounselorEarnings() {
               </div>
             </div>
 
-            {/* Payout Information Card */}
             <div className="space-y-6">
               <div className="bg-parchment-card border-4 border-navy rounded-3xl p-6 shadow-pop">
                 <h3 className="font-grotesk font-extrabold text-lg text-navy mb-4">Payout Schedule & Terms</h3>

@@ -114,7 +114,6 @@ export default function RoadmapGenerator() {
         <Sidebar activeTab="roadmap" role="student" />
 
         <main className="flex-1 p-8 bg-grid-pattern overflow-y-auto">
-          {/* Header */}
           <div className="mb-8">
             <div className="inline-block bg-yellow border-3 border-navy px-3 py-1 rounded-full shadow-pop-sm font-mono text-xs font-bold text-navy mb-2">
               CAREER DISCOVERY ENGINE
@@ -129,7 +128,6 @@ export default function RoadmapGenerator() {
 
           <div className="bg-parchment-card border-4 border-navy rounded-3xl p-8 shadow-pop max-w-3xl">
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Target Career Field */}
               <div>
                 <label className="block font-grotesk font-extrabold text-sm text-navy uppercase mb-2">
                   1. What domain or role do you want to break into?
@@ -144,7 +142,6 @@ export default function RoadmapGenerator() {
                 />
               </div>
 
-              {/* Current Skill Level */}
               <div>
                 <label className="block font-grotesk font-extrabold text-sm text-navy uppercase mb-2">
                   2. What is your current knowledge level in this area?
@@ -168,7 +165,6 @@ export default function RoadmapGenerator() {
                 </div>
               </div>
 
-              {/* Weekly Time Commitment */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block font-grotesk font-extrabold text-sm text-navy uppercase mb-2">
@@ -201,7 +197,6 @@ export default function RoadmapGenerator() {
                 </div>
               </div>
 
-              {/* Specific Ambitions or Doubts */}
               <div>
                 <label className="block font-grotesk font-extrabold text-sm text-navy uppercase mb-2">
                   5. Additional background context, dream companies, or target salary
@@ -216,7 +211,6 @@ export default function RoadmapGenerator() {
                 ></textarea>
               </div>
 
-              {/* Submit CTA */}
               <div className="pt-4 border-t-3 border-navy flex flex-col md:flex-row justify-between items-center gap-4">
                 <div className="flex items-center space-x-2 font-mono text-xs text-navy">
                   <span className="w-2.5 h-2.5 rounded-full bg-rust"></span>

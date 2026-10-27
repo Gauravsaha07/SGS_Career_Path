@@ -56,7 +56,6 @@ export default function CounselorBookings() {
         <Sidebar activeTab="counselor_sessions" role="counselor" />
 
         <main className="flex-1 p-8 bg-grid-pattern overflow-y-auto">
-          {/* Header Banner */}
           <div className="bg-yellow border-4 border-navy rounded-3xl p-6 shadow-pop mb-8">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
@@ -79,7 +78,6 @@ export default function CounselorBookings() {
             </div>
           </div>
 
-          {/* Quick Stats Summary */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <Card color="white">
               <div className="font-mono text-xs font-bold text-navy-muted uppercase">Total Bookings</div>
@@ -102,7 +100,6 @@ export default function CounselorBookings() {
             </Card>
           </div>
 
-          {/* Filter Tabs */}
           <div className="flex items-center space-x-3 mb-6">
             <button
               onClick={() => setFilter('all')}
@@ -130,7 +127,6 @@ export default function CounselorBookings() {
             </button>
           </div>
 
-          {/* Bookings List */}
           <div className="bg-parchment-card border-4 border-navy rounded-3xl p-6 shadow-pop">
             <h2 className="font-grotesk font-extrabold text-xl text-navy mb-4">Appointments Ledger</h2>
 

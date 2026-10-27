@@ -6,7 +6,6 @@ let isConfigured = false;
 const configureCloudinary = () => {
   if (isConfigured) return;
 
-  // Prefer CLOUDINARY_URL if present, otherwise fallback to separate credentials
   if (process.env.CLOUDINARY_URL) {
     cloudinary.config({
       cloudinary_url: process.env.CLOUDINARY_URL
@@ -39,7 +38,6 @@ const uploadToCloudinary = async (fileLink) => {
       try {
         fs.unlinkSync(fileLink);
       } catch (err) {
-        // silent cleanup failure
       }
     }
   }

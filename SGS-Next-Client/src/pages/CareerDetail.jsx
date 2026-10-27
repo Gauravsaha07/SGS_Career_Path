@@ -76,14 +76,12 @@ export default function CareerDetail() {
         <Sidebar activeTab="explorer" role="student" />
 
         <main className="flex-1 p-8 bg-grid-pattern overflow-y-auto">
-          {/* Back Navigation */}
           <div className="mb-4">
             <Link to="/auth/careers" className="font-grotesk font-bold text-xs text-navy hover:text-rust flex items-center space-x-1">
               <span>← Back to Career Explorer</span>
             </Link>
           </div>
 
-          {/* Main Title Card */}
           <div className="bg-yellow border-4 border-navy rounded-3xl p-8 shadow-pop mb-8 relative">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
@@ -126,11 +124,8 @@ export default function CareerDetail() {
             </div>
           </div>
 
-          {/* Grid Layout: Salary & Skills */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left 2 Cols: Salary Progression & Skills Breakdown */}
             <div className="lg:col-span-2 space-y-8">
-              {/* Salary Trajectory Card */}
               <div className="bg-parchment-card border-4 border-navy rounded-3xl p-6 shadow-pop">
                 <h2 className="font-grotesk font-extrabold text-xl text-navy mb-4">Indian Salary Trajectory</h2>
                 <div className="space-y-4">
@@ -148,7 +143,6 @@ export default function CareerDetail() {
                 </div>
               </div>
 
-              {/* Skills Tree Card */}
               <div className="bg-parchment-card border-4 border-navy rounded-3xl p-6 shadow-pop">
                 <h2 className="font-grotesk font-extrabold text-xl text-navy mb-4">Required Technology Stack</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -171,7 +165,6 @@ export default function CareerDetail() {
               </div>
             </div>
 
-            {/* Right 1 Col: Counselor Guidance & Prerequisites */}
             <div className="space-y-8">
               <div className="bg-teal-container border-4 border-navy rounded-3xl p-6 shadow-pop">
                 <StatusBadge text="EXPERT COUNSELOR MATCH" status="info" />

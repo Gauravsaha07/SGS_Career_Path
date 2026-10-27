@@ -46,7 +46,6 @@ export default function RegisterPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Client-side file type validation
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
     if (!allowedTypes.includes(file.type)) {
       toast.error("Invalid file type! Please upload a JPG, PNG, or WebP image.");
@@ -54,7 +53,6 @@ export default function RegisterPage() {
       return;
     }
 
-    // Client-side 2 MB size validation
     if (file.size > 2 * 1024 * 1024) {
       toast.error("File size exceeds 2 MB limit! Please choose a smaller image.");
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -126,7 +124,6 @@ export default function RegisterPage() {
       return;
     }
 
-    // Prepare FormData for multipart/form-data upload
     const submitData = new FormData();
     submitData.append("name", name.trim());
     submitData.append("email", email.trim().toLowerCase());
@@ -274,7 +271,7 @@ export default function RegisterPage() {
                 >
                   <option>High School (9th)</option>
                   <option>High School (10th)</option>
-                  <option>High School (11th/12th)</option>
+                  <option>Higher Secondary School (11th/12th)</option>
                   <option>College Student (Undergrad)</option>
                   <option>Recent Graduate</option>
                   <option>Working Professional</option>
@@ -282,7 +279,6 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {/* Profile Picture Upload with Preview */}
             <div>
               <label className="block font-grotesk font-bold text-xs uppercase tracking-wider text-navy mb-1.5">
                 Profile Picture (Optional)

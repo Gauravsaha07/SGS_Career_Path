@@ -6,7 +6,6 @@ let currentToken = null;
 export const getSocket = (token) => {
   if (!token) return null;
 
-  // If already connected or connecting with the same token, reuse the instance
   if (socketInstance && currentToken === token) {
     if (!socketInstance.connected && !socketInstance.active) {
       socketInstance.connect();
@@ -14,7 +13,6 @@ export const getSocket = (token) => {
     return socketInstance;
   }
 
-  // If token changed or existing socket needs cleanup, disconnect cleanly
   if (socketInstance) {
     socketInstance.removeAllListeners();
     socketInstance.disconnect();

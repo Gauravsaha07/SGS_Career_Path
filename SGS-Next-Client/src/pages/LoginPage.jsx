@@ -38,7 +38,6 @@ export default function LoginPage() {
     return cleaned;
   };
 
-  // Determine input format for friendly feedback
   const getIdentifierType = () => {
     const trimmed = identifier.trim();
     if (!trimmed) return null;
@@ -81,7 +80,6 @@ export default function LoginPage() {
       return;
     }
 
-    // Client-side format validation
     if (trimmed.includes("@")) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(trimmed)) {
@@ -98,7 +96,7 @@ export default function LoginPage() {
 
     mutate({
       identifier: trimmed,
-      email: trimmed, // for backward compatibility
+      email: trimmed,
       password
     });
   };
@@ -144,7 +142,6 @@ export default function LoginPage() {
       <Header />
       <main className="flex-1 flex items-center justify-center p-6 bg-grid-pattern">
         <div className="w-full max-w-md bg-parchment-card border-4 border-navy rounded-3xl p-8 shadow-pop-lg relative overflow-hidden">
-          {/* Decorative Sticker Badge */}
           <div className="absolute -top-3 -right-3 bg-rust text-white font-mono text-[10px] font-bold uppercase tracking-widest px-3 py-1 border-2 border-navy rotate-6 shadow-pop-sm">
             Student Portal
           </div>

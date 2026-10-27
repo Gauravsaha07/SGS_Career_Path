@@ -51,7 +51,6 @@ export default function AdminOverview() {
         <Sidebar activeTab="admin_overview" role="admin" />
 
         <main className="flex-1 p-8 bg-grid-pattern overflow-y-auto">
-          {/* Header */}
           <div className="bg-navy text-white border-4 border-navy rounded-3xl p-6 shadow-pop mb-8">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
@@ -78,7 +77,6 @@ export default function AdminOverview() {
             </div>
           </div>
 
-          {/* Metrics Overview Grid */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <Card color="white">
               <div className="font-mono text-xs font-bold text-navy-muted uppercase">Total Registered Users</div>
@@ -105,7 +103,6 @@ export default function AdminOverview() {
             </Card>
           </div>
 
-          {/* Activity Log & Pending Actions */}
           <div className="grid grid-cols-1 gap-8">
             <div className="lg:col-span-2">
               <div className="bg-parchment-card border-4 border-navy rounded-3xl p-6 shadow-pop">
@@ -144,7 +141,6 @@ export default function AdminOverview() {
         </main>
       </div>
 
-      {/* System Health Report Modal */}
       {showHealthModal && (
         <div className="fixed inset-0 bg-navy/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-parchment-card border-4 border-navy rounded-3xl p-6 max-w-lg w-full shadow-pop space-y-4">

@@ -26,14 +26,12 @@ export default function CounselorProfile() {
         <Sidebar activeTab="counselors" role="student" />
 
         <main class="flex-1 p-8 bg-grid-pattern overflow-y-auto">
-          {/* Back Button */}
           <div class="mb-4">
             <a href="#" class="font-grotesk font-bold text-xs text-navy hover:text-rust flex items-center space-x-1">
               <span>← Back to Counselor List</span>
             </a>
           </div>
 
-          {/* Profile Banner */}
           <div class="bg-yellow border-4 border-navy rounded-3xl p-8 shadow-pop mb-8 relative">
             <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
               <div class="flex items-center space-x-5">
@@ -58,9 +56,7 @@ export default function CounselorProfile() {
             </div>
           </div>
 
-          {/* 2 Col Grid: Details & Slot Selector */}
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left 2 Cols: Bio, Experience & Reviews */}
             <div class="lg:col-span-2 space-y-8">
               <div class="bg-parchment-card border-4 border-navy rounded-3xl p-6 shadow-pop">
                 <h2 class="font-grotesk font-extrabold text-xl text-navy mb-3">About Dr. Ramesh</h2>
@@ -85,7 +81,6 @@ export default function CounselorProfile() {
                 </div>
               </div>
 
-              {/* Reviews Section */}
               <div class="bg-parchment-card border-4 border-navy rounded-3xl p-6 shadow-pop">
                 <h2 class="font-grotesk font-extrabold text-xl text-navy mb-4">Student Reviews & Ratings</h2>
                 <div class="space-y-4">
@@ -102,7 +97,6 @@ export default function CounselorProfile() {
               </div>
             </div>
 
-            {/* Right 1 Col: Booking Slot Component */}
             <div class="space-y-8">
               <div class="bg-parchment-card border-4 border-navy rounded-3xl p-6 shadow-pop">
                 <h3 class="font-grotesk font-extrabold text-lg text-navy mb-1">Book 1-on-1 Session</h3>

@@ -18,7 +18,6 @@ export default function CounselorDashboard() {
         <Sidebar activeTab="counselor_overview" role="counselor" />
 
         <main class="flex-1 p-8 bg-grid-pattern overflow-y-auto">
-          {/* Welcome Banner */}
           <div class="bg-yellow border-4 border-navy rounded-3xl p-6 shadow-pop mb-8">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
@@ -44,7 +43,6 @@ export default function CounselorDashboard() {
             </div>
           </div>
 
-          {/* Key Counselor Metrics */}
           <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <Card color="white">
               <div class="font-mono text-xs font-bold text-navy-muted uppercase">Sessions Completed</div>
@@ -71,7 +69,6 @@ export default function CounselorDashboard() {
             </Card>
           </div>
 
-          {/* Session Requests & Schedule */}
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-6">
               <div class="bg-parchment-card border-4 border-navy rounded-3xl p-6 shadow-pop">
@@ -102,7 +99,6 @@ export default function CounselorDashboard() {
               </div>
             </div>
 
-            {/* Quick Settings */}
             <div class="space-y-6">
               <div class="bg-parchment-card border-4 border-navy rounded-3xl p-6 shadow-pop">
                 <h3 class="font-grotesk font-extrabold text-lg text-navy mb-3">Counselor Settings</h3>

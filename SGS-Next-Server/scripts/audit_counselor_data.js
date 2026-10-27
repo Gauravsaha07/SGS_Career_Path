@@ -2,11 +2,6 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 dotenv.config();
 
-/**
- * Optional Data Audit & Repair Script for SGS-NEXT-STEP
- * Default mode: DRY RUN (read-only, does not modify any data).
- * To perform repairs: run with --fix flag.
- */
 async function auditData() {
     const isFixMode = process.argv.includes("--fix");
 

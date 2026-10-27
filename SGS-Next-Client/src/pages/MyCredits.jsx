@@ -22,7 +22,6 @@ export default function MyCredits() {
     { name: 'Pro Career Pack', credits: '700', displayCredits: '700 Credits', price: '₹1,299', perCredit: '₹1.85 / credit', popular: false, badge: 'BEST VALUE' },
   ];
 
-  // Fetch live credit balance
   const { data: meData } = useQuery({
     queryKey: ['me'],
     queryFn: () => authService.getMe(user?.token),
@@ -35,7 +34,6 @@ export default function MyCredits() {
     }
   }, [meData, user, dispatch]);
 
-  // Fetch real credit history
   const { data: historyData, isLoading: historyLoading } = useQuery({
     queryKey: ['credit-history'],
     queryFn: () => creditService.fetchCreditHistory(user?.token),
@@ -69,7 +67,6 @@ export default function MyCredits() {
         <Sidebar activeTab="credits" role="student" />
 
         <main className="flex-1 p-8 bg-grid-pattern overflow-y-auto">
-          {/* Header & Balance Banner */}
           <div className="bg-yellow border-4 border-navy rounded-3xl p-8 shadow-pop mb-8 relative">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
               <div>
@@ -94,7 +91,6 @@ export default function MyCredits() {
             </div>
           </div>
 
-          {/* Top-up Packs Section */}
           <div className="mb-10">
             <h2 className="font-grotesk font-extrabold text-2xl text-navy mb-2">Buy Credit Top-Up Packs</h2>
             <p className="font-body text-xs text-navy-muted mb-6">Instant credit delivery via UPI, GPay, PhonePe, or Net Banking.</p>
@@ -143,7 +139,6 @@ export default function MyCredits() {
             </div>
           </div>
 
-          {/* Transaction History Ledger */}
           <div className="bg-parchment-card border-4 border-navy rounded-3xl p-6 shadow-pop">
             <h2 className="font-grotesk font-extrabold text-xl text-navy mb-4">Credit Transaction Ledger</h2>
             <div className="overflow-x-auto">

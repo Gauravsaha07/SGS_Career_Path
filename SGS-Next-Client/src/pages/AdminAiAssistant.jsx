@@ -18,8 +18,6 @@ export default function AdminAiAssistant() {
 
   const dispatch = useDispatch()
 
-  //  { id: 101, sender: 'Dr. Ramesh Kumar', time: '10:15 AM', message: 'Namaste Aarav! I reviewed your GitHub repository for the Next.js e-commerce app.', isSelf: false }
-
   const { user } = useSelector(state => state.auth)
   const { messages } = useSelector(state => state.admin)
 
@@ -64,7 +62,6 @@ export default function AdminAiAssistant() {
       <div className="flex-1 flex">
         <Sidebar activeTab="admin_ai" role="admin" />
         <div className="flex-1 flex flex-col justify-between bg-parchment-card">
-          {/* Chat Window Header */}
           <div className="p-4 border-b-4 border-navy bg-yellow/30 flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 rounded-xl bg-sky border-2 border-navy flex items-center justify-center font-grotesk font-extrabold text-sm text-navy">
@@ -76,7 +73,6 @@ export default function AdminAiAssistant() {
             </div>
           </div>
 
-          {/* Chat Messages Log */}
           <div className="p-6 overflow-y-auto space-y-4 max-h-[460px] bg-grid-pattern">
             {messages?.map((msg) => (
               <ChatBubble key={msg.id} sender={msg.sender} time={msg.time} message={msg.message} isSelf={msg.isSelf} />
@@ -92,7 +88,6 @@ export default function AdminAiAssistant() {
             )}
           </div>
 
-          {/* Chat Input Bar */}
           <div className="p-4 border-t-4 border-navy bg-parchment">
             <form onSubmit={handleSubmit} className="flex items-center space-x-3">
               <input

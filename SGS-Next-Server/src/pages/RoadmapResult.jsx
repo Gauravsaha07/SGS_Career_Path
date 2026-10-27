@@ -68,7 +68,6 @@ export default function RoadmapResult() {
         <Sidebar activeTab="roadmap" role="student" />
 
         <main class="flex-1 p-8 bg-grid-pattern overflow-y-auto">
-          {/* Header Banner */}
           <div class="bg-yellow border-4 border-navy rounded-3xl p-8 shadow-pop mb-8 relative">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
@@ -95,11 +94,9 @@ export default function RoadmapResult() {
             </div>
           </div>
 
-          {/* Timeline Phases */}
           <div class="space-y-6 max-w-5xl">
             {phases.map((p, idx) => (
               <div key={idx} class="bg-parchment-card border-4 border-navy rounded-3xl p-6 shadow-pop relative">
-                {/* Connecting Line Indicator */}
                 {idx < phases.length - 1 && (
                   <div class="hidden lg:block absolute left-8 -bottom-7 w-1 h-7 bg-navy"></div>
                 )}

@@ -157,14 +157,12 @@ export default function CounselorProfile() {
         <Sidebar activeTab="counselors" role={effectiveRole} />
 
         <main className="flex-1 p-8 bg-grid-pattern overflow-y-auto">
-          {/* Back Button */}
           <div className="mb-4">
             <Link to="/auth/counselors" className="font-grotesk font-bold text-xs text-navy hover:text-rust flex items-center space-x-1">
               <span>← Back to Counselor List</span>
             </Link>
           </div>
 
-          {/* Profile Banner */}
           <div className="bg-yellow border-4 border-navy rounded-3xl p-8 shadow-pop mb-8 relative">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
               <div className="flex items-center space-x-5">
@@ -197,9 +195,7 @@ export default function CounselorProfile() {
             </div>
           </div>
 
-          {/* 2 Col Grid: Details & Slot Selector */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left 2 Cols: Bio, Experience & Reviews */}
             <div className="lg:col-span-2 space-y-8">
               <div className="bg-parchment-card border-4 border-navy rounded-3xl p-6 shadow-pop">
                 <h2 className="font-grotesk font-extrabold text-xl text-navy mb-3">About {counselorName}</h2>
@@ -224,7 +220,6 @@ export default function CounselorProfile() {
                 </div>
               </div>
 
-              {/* Reviews Section */}
               <div className="bg-parchment-card border-4 border-navy rounded-3xl p-6 shadow-pop">
                 <div className="flex justify-between items-center mb-4">
                   <div>
@@ -300,7 +295,6 @@ export default function CounselorProfile() {
               </div>
             </div>
 
-            {/* Right 1 Col: Booking Slot Component */}
             <div className="space-y-8">
               <div className="bg-parchment-card border-4 border-navy rounded-3xl p-6 shadow-pop">
                 <h3 className="font-grotesk font-extrabold text-lg text-navy mb-1">Book 1-on-1 Session</h3>

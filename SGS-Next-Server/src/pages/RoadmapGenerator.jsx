@@ -13,7 +13,6 @@ export default function RoadmapGenerator() {
         <Sidebar activeTab="roadmap" role="student" />
 
         <main class="flex-1 p-8 bg-grid-pattern overflow-y-auto">
-          {/* Header */}
           <div class="mb-8 max-w-3xl">
             <div class="inline-block bg-yellow border-3 border-navy px-3 py-1 rounded-full shadow-pop-sm font-mono text-xs font-bold text-navy mb-2">
               AI ENGINE V2.4
@@ -27,7 +26,6 @@ export default function RoadmapGenerator() {
           </div>
 
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Form Section */}
             <div class="lg:col-span-2">
               <div class="bg-parchment-card border-4 border-navy rounded-3xl p-8 shadow-pop relative">
                 <div class="absolute -top-3 -right-3 bg-rust text-white font-mono text-[10px] font-bold uppercase tracking-widest px-3 py-1 border-2 border-navy rotate-3 shadow-pop-sm">
@@ -35,7 +33,6 @@ export default function RoadmapGenerator() {
                 </div>
 
                 <form class="space-y-6">
-                  {/* Step 1: Target Role */}
                   <div>
                     <label class="block font-grotesk font-extrabold text-sm uppercase tracking-wider text-navy mb-2">
                       1. Target Career Role
@@ -48,7 +45,6 @@ export default function RoadmapGenerator() {
                     />
                   </div>
 
-                  {/* Step 2: Current Experience */}
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label class="block font-grotesk font-bold text-xs uppercase text-navy mb-2">
@@ -73,7 +69,6 @@ export default function RoadmapGenerator() {
                     </div>
                   </div>
 
-                  {/* Step 3: Target Salary Expectation */}
                   <div>
                     <label class="block font-grotesk font-bold text-xs uppercase text-navy mb-2">
                       4. Desired Starting Package Goal (INR)
@@ -94,7 +89,6 @@ export default function RoadmapGenerator() {
                     </div>
                   </div>
 
-                  {/* Step 4: Special Instructions */}
                   <div>
                     <label class="block font-grotesk font-bold text-xs uppercase text-navy mb-2">
                       5. Specific Goal / Background Notes
@@ -119,7 +113,6 @@ export default function RoadmapGenerator() {
               </div>
             </div>
 
-            {/* Information Side Panel */}
             <div class="space-y-6">
               <div class="bg-yellow border-4 border-navy rounded-3xl p-6 shadow-pop">
                 <StatusBadge text="HOW IT WORKS" status="success" />

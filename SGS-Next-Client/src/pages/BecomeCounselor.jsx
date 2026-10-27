@@ -15,7 +15,6 @@ export default function BecomeCounselor() {
 
   const effectiveRole = (user?.userType || '').toLowerCase();
 
-  // Redirect users who are already counselors or admins
   if (effectiveRole === 'counselor') {
     return <Navigate to="/auth/counselor" replace />;
   }
@@ -49,7 +48,6 @@ export default function BecomeCounselor() {
         <Sidebar activeTab="become_counselor" role={effectiveRole || 'student'} />
 
         <main className="flex-1 p-8 bg-grid-pattern overflow-y-auto">
-          {/* Header */}
           <div className="mb-8 max-w-3xl">
             <div className="inline-block bg-yellow border-3 border-navy px-3 py-1 rounded-full shadow-pop-sm font-mono text-xs font-bold text-navy mb-2">
               COUNSELOR PARTNER PROGRAM
@@ -63,7 +61,6 @@ export default function BecomeCounselor() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Application Form or Status View */}
             <div className="lg:col-span-2">
               {isAccepted ? (
                 <div className="bg-parchment-card border-4 border-navy rounded-3xl p-8 shadow-pop relative">
@@ -131,7 +128,6 @@ export default function BecomeCounselor() {
               )}
             </div>
 
-            {/* Perks Side Card */}
             <div className="space-y-6">
               <div className="bg-yellow border-4 border-navy rounded-3xl p-6 shadow-pop">
                 <StatusBadge text="MENTOR BENEFITS" status="success" />

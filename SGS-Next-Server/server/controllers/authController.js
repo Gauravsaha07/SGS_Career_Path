@@ -6,7 +6,6 @@ import Counselor from "../models/counselorModel.js";
 import fs from "node:fs";
 import uploadToCloudinary from "../middleware/cloudinaryMiddleware.js";
 
-// Helper: Normalize phone to 10 digits
 export const normalizePhone = (input) => {
     if (!input) return "";
     let cleaned = input.toString().replace(/\D/g, "");
@@ -18,7 +17,6 @@ export const normalizePhone = (input) => {
     return cleaned;
 };
 
-// Helper: Validate 10-digit Indian mobile number (starts with 6-9)
 export const isValidIndianPhone = (phone) => {
     return /^[6-9]\d{9}$/.test(phone);
 };
@@ -65,7 +63,6 @@ const registerUser = async (req, res) => {
 
     qualification = qualification || status || "College Student (Undergrad)";
 
-    // Uniqueness checks: separate 409 checks for email and phone
     const emailExist = await User.findOne({ email: email.toLowerCase().trim() });
     if (emailExist) {
         res.status(409);
@@ -80,11 +77,9 @@ const registerUser = async (req, res) => {
         throw new Error("User with this mobile number already exists!");
     }
 
-    // Hash Password (10 rounds)
     const salt = bcrypt.genSaltSync(10);
     const hashedPassword = bcrypt.hashSync(password, salt);
 
-    // Profile picture: real upload if provided, otherwise deterministic avatar
     let profilePicUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name.trim())}&background=0D1A3C&color=FFD84D&bold=true`;
     if (req.file) {
         try {
@@ -108,7 +103,7 @@ const registerUser = async (req, res) => {
         password: hashedPassword,
         qualification,
         location: location.trim(),
-        credits: 100, // 100 free welcome credits as stated across landing and registration
+        credits: 100,
         profilePic: profilePicUrl
     });
 
@@ -117,7 +112,6 @@ const registerUser = async (req, res) => {
         throw new Error('User not created!');
     }
 
-    // Record welcome bonus transaction
     await Credit.create({
         user: user._id,
         credits: 100,
@@ -141,7 +135,6 @@ const registerUser = async (req, res) => {
 };
 
 const loginUser = async (req, res) => {
-    // Accepts identifier (or email for backward compatibility) and password
     const { identifier, email, password } = req.body;
     const loginTarget = identifier || email;
 
@@ -159,10 +152,8 @@ const loginUser = async (req, res) => {
     const trimmedTarget = loginTarget.trim();
 
     if (trimmedTarget.includes("@")) {
-        // Query by email
         user = await User.findOne({ email: trimmedTarget.toLowerCase() });
     } else {
-        // Query by mobile number (normalized and raw)
         const normalizedPhone = normalizePhone(trimmedTarget);
         user = await User.findOne({
             $or: [
@@ -284,7 +275,6 @@ const privateController = async (req, res) => {
     });
 };
 
-// Generate Token
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
 };

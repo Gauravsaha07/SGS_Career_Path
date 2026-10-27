@@ -68,7 +68,6 @@ export default function LandingPage() {
 
   return (
     <div class="min-h-screen bg-parchment text-navy font-body antialiased selection:bg-yellow selection:text-navy">
-      {/* 1. Header / Nav (Solid Navy Band matching StudentDashboard.jsx top bar style) */}
       <header class="w-full bg-navy text-white px-6 lg:px-12 py-5 border-b-2 border-navy sticky top-0 z-40">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
           <a href="#" class="flex items-center space-x-3 group">
@@ -106,9 +105,7 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* 2. Hero Section (Parchment canvas with generous whitespace & Space Grotesk Medium title + Trajectory SVG) */}
       <section class="max-w-7xl mx-auto px-6 lg:px-12 py-20 lg:py-28 relative overflow-hidden">
-        {/* Quiet Trajectory Line Background SVG (Moment 1 of visual richness) */}
         <div class="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none opacity-30 hidden lg:block">
           <svg width="460" height="240" viewBox="0 0 460 240" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M 20 200 C 140 20, 300 220, 440 40" stroke="#0d1a3c" strokeWidth="2" strokeDasharray="5 5" />
@@ -145,7 +142,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 3. Trust Strip (Space Mono numerals texture matching MyCredits.jsx) */}
       <section class="border-y-2 border-navy/20 bg-parchment-card py-12 px-6 lg:px-12">
         <div class="max-w-7xl mx-auto">
           <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -162,7 +158,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 4. How It Works (Trajectory Arc section visually matching RoadmapResult.jsx closely) */}
       <section id="how-it-works" class="py-20 px-6 lg:px-12 border-b-2 border-navy/20 bg-parchment">
         <div class="max-w-7xl mx-auto">
           <div class="max-w-2xl mb-12">
@@ -175,11 +170,9 @@ export default function LandingPage() {
             </p>
           </div>
 
-          {/* Timeline Phases matching RoadmapResult.jsx layout & classes */}
           <div class="space-y-8 max-w-5xl">
             {steps.map((p, idx) => (
               <div key={idx} class="bg-parchment-card border-2 border-navy rounded-3xl p-6 relative">
-                {/* Connecting Line Indicator matching RoadmapResult.jsx */}
                 {idx < steps.length - 1 && (
                   <div class="hidden lg:block absolute left-8 -bottom-9 w-1 h-9 bg-navy"></div>
                 )}
@@ -224,11 +217,9 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 5. For Students / For Counselors (Teal & Yellow color moments) */}
       <section id="audiences" class="py-20 px-6 lg:px-12 bg-parchment border-b-2 border-navy/20">
         <div class="max-w-7xl mx-auto">
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Students Card with Teal accent moment */}
             <div class="bg-teal-container border-2 border-navy rounded-3xl p-8 flex flex-col justify-between">
               <div>
                 <StatusBadge text="FOR STUDENTS" status="info" />
@@ -265,7 +256,6 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Counselors Card with Yellow highlight moment */}
             <div class="bg-yellow border-2 border-navy rounded-3xl p-8 flex flex-col justify-between">
               <div>
                 <StatusBadge text="FOR MENTORS & EXPERTS" status="success" />
@@ -305,7 +295,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 6. Featured Catalog Preview (Clean row list pattern) */}
       <section id="previews" class="py-20 px-6 lg:px-12 bg-parchment border-b-2 border-navy/20">
         <div class="max-w-7xl mx-auto">
           <div class="bg-parchment-card border-2 border-navy rounded-3xl p-6 md:p-8">
@@ -352,7 +341,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 7. Credits & Wallet Explainer (Mustard data accent moment) */}
       <section id="credits" class="py-20 px-6 lg:px-12 bg-parchment border-b-2 border-navy/20">
         <div class="max-w-7xl mx-auto">
           <div class="bg-parchment-card border-2 border-navy rounded-3xl p-8 mb-8">
@@ -405,7 +393,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 8. Final CTA Band (Full-width Solid Navy Section with Real Vertical Padding py-20) */}
       <section class="bg-navy text-parchment py-20 px-6 lg:px-12 border-t-2 border-navy relative overflow-hidden">
         <div class="max-w-4xl mx-auto text-center space-y-6">
           <div class="inline-block bg-yellow text-navy font-mono text-xs font-bold px-3.5 py-1 rounded-full uppercase">
@@ -431,7 +418,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 9. Footer */}
       <footer class="bg-parchment-card border-t-2 border-navy py-12 px-6 lg:px-12">
         <div class="max-w-7xl mx-auto">
           <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">

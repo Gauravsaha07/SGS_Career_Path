@@ -41,7 +41,6 @@ export default function StudentDashboard() {
     }
   }, [user]);
 
-  // Sync latest user profile and credits
   useEffect(() => {
     if (user?.token) {
       authService.getMe(user.token).then((freshData) => {
@@ -63,7 +62,6 @@ export default function StudentDashboard() {
     }
   }, [user, navigate]);
 
-  // Fetch real roadmaps from DB
   const { data: roadmaps = [], isLoading: loadingRoadmaps } = useQuery({
     queryKey: ['myRoadmaps', user?._id],
     queryFn: () => roadmapService.fetchMyRoadmaps(user?.token),
@@ -183,7 +181,6 @@ export default function StudentDashboard() {
         <Sidebar activeTab="overview" role="student" />
 
         <main className="flex-1 p-8 bg-grid-pattern overflow-y-auto">
-          {/* Welcome Banner */}
           <div className="bg-yellow border-4 border-navy rounded-3xl p-6 shadow-pop mb-8 relative">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-start space-x-4">
@@ -226,7 +223,6 @@ export default function StudentDashboard() {
             </div>
           </div>
 
-          {/* Key Metrics Grid */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <Card color="white" className="border-3">
               <div className="font-mono text-xs font-bold text-navy-muted uppercase">Active Roadmaps</div>
@@ -257,11 +253,8 @@ export default function StudentDashboard() {
             </Card>
           </div>
 
-          {/* Main Dashboard Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left 2 Cols: Active Roadmaps & Sessions */}
             <div className="lg:col-span-2 space-y-8">
-              {/* Active Roadmaps Section */}
               <div className="bg-parchment-card border-4 border-navy rounded-3xl p-6 shadow-pop">
                 <div className="flex justify-between items-center mb-6">
                   <div>
@@ -316,7 +309,6 @@ export default function StudentDashboard() {
                             </span>
                           </div>
 
-                          {/* Progress Bar */}
                           <div className="mt-4">
                             <div className="flex justify-between text-xs font-mono font-bold mb-1">
                               <span>Overall Progress</span>
@@ -353,7 +345,6 @@ export default function StudentDashboard() {
                 </div>
               </div>
 
-              {/* Upcoming Counseling Sessions */}
               <div className="bg-parchment-card border-4 border-navy rounded-3xl p-6 shadow-pop">
                 <div className="flex justify-between items-center mb-6">
                   <div>
@@ -398,9 +389,7 @@ export default function StudentDashboard() {
               </div>
             </div>
 
-            {/* Right 1 Col: Quick Tools & Credit Summary */}
             <div className="space-y-8">
-              {/* Credit Wallet Widget */}
               <div className="bg-rust-container border-4 border-navy rounded-3xl p-6 shadow-pop relative overflow-hidden">
                 <div className="font-mono text-xs font-bold text-navy uppercase tracking-wider mb-1">
                   CREDIT BALANCE
@@ -424,7 +413,6 @@ export default function StudentDashboard() {
                 </div>
               </div>
 
-              {/* Quick Actions Card */}
               <div className="bg-parchment-card border-4 border-navy rounded-3xl p-6 shadow-pop">
                 <h3 className="font-grotesk font-extrabold text-lg text-navy mb-4">Quick Student Tools</h3>
                 <div className="space-y-3">
@@ -459,7 +447,6 @@ export default function StudentDashboard() {
                 </div>
               </div>
 
-              {/* Recommended Counselor Highlight */}
               <div className="bg-yellow border-4 border-navy rounded-3xl p-6 shadow-pop">
                 <StatusBadge text="SPOTLIGHT MENTOR" status="success" />
                 <h3 className="font-grotesk font-extrabold text-xl text-navy mt-3">Sneha Mukherjee</h3>
@@ -483,7 +470,6 @@ export default function StudentDashboard() {
         </main>
       </div>
 
-      {/* Edit Profile Modal */}
       {showEditModal && (
         <div className="fixed inset-0 bg-navy/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-parchment-card border-4 border-navy rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-pop-lg space-y-4">
@@ -504,7 +490,6 @@ export default function StudentDashboard() {
             </div>
 
             <form onSubmit={handleSaveProfile} className="space-y-4">
-              {/* Profile Image with preview and picker */}
               <div>
                 <label className="block font-grotesk font-bold text-xs uppercase tracking-wider text-navy mb-1.5">
                   Profile Picture

@@ -105,7 +105,6 @@ const getCounselors = async (req, res) => {
         throw new Error("Counselors Not Found!");
     }
 
-    // Provide safe fallback objects if linked user or category is null/deleted
     const sanitized = counselors.map(c => ({
         ...c,
         user: c.user || {
@@ -220,7 +219,6 @@ const updateCredit = async (req, res) => {
         throw new Error("Credit Request Not Found!")
     }
 
-    // Update Credits For User
     const user = await User.findById(creditRequest.user)
 
 
@@ -235,7 +233,6 @@ const updateCredit = async (req, res) => {
         const updatedUser = await User.findByIdAndUpdate(user._id, { credits: user.credits + creditRequest.credits }, { new: true })
     }
 
-    // Update Status
     const updatedCreditRequest = await Credit.findByIdAndUpdate(creditRequest._id, { status }, { new: true })
 
 

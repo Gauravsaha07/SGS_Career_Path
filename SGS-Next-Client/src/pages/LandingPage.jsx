@@ -71,9 +71,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-parchment text-navy font-body antialiased selection:bg-yellow selection:text-navy">
       <Header />
-      {/* 2. Hero Section (Parchment canvas with generous whitespace & Space Grotesk Medium title + Trajectory SVG) */}
       <section className="max-w-7xl mx-auto px-6 lg:px-12 py-20 lg:py-28 relative overflow-hidden">
-        {/* Quiet Trajectory Line Background SVG (Moment 1 of visual richness) */}
         <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none opacity-30 hidden lg:block">
           <svg width="460" height="240" viewBox="0 0 460 240" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M 20 200 C 140 20, 300 220, 440 40" stroke="#0d1a3c" strokeWidth="2" strokeDasharray="5 5" />
@@ -89,7 +87,7 @@ export default function LandingPage() {
           </div>
 
           <h1 className="font-grotesk font-medium text-4xl sm:text-5xl lg:text-6xl text-navy tracking-tight leading-tight">
-            Find your next stop in your <span className="text-rust">career journey</span>.
+            Find your next step in your <span className="text-rust">career journey</span>.
           </h1>
 
           <p className="font-body font-normal text-base sm:text-lg text-navy-muted mt-6 leading-relaxed max-w-2xl">
@@ -110,7 +108,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 3. Trust Strip (Space Mono numerals texture matching MyCredits.jsx) */}
       <section className="border-y-2 border-navy/20 bg-parchment-card py-12 px-6 lg:px-12">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -127,7 +124,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 4. How It Works (Trajectory Arc section visually matching RoadmapResult.jsx closely) */}
       <section id="how-it-works" className="py-20 px-6 lg:px-12 border-b-2 border-navy/20 bg-parchment">
         <div className="max-w-7xl mx-auto">
           <div className="max-w-2xl mb-12">
@@ -140,11 +136,9 @@ export default function LandingPage() {
             </p>
           </div>
 
-          {/* Timeline Phases matching RoadmapResult.jsx layout & classes */}
           <div className="space-y-8 max-w-5xl">
             {steps.map((p, idx) => (
               <div key={idx} className="bg-parchment-card border-2 border-navy rounded-3xl p-6 relative">
-                {/* Connecting Line Indicator matching RoadmapResult.jsx */}
                 {idx < steps.length - 1 && (
                   <div className="hidden lg:block absolute left-8 -bottom-9 w-1 h-9 bg-navy"></div>
                 )}

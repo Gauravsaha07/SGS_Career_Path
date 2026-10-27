@@ -28,7 +28,6 @@ export default function ChatPage() {
 
         <main class="flex-1 p-8 bg-grid-pattern overflow-y-auto flex">
           <div class="w-full bg-parchment-card border-4 border-navy rounded-3xl shadow-pop flex flex-col lg:flex-row overflow-hidden min-h-[650px]">
-            {/* Left Chat Sidebar */}
             <div class="w-full lg:w-80 border-b-4 lg:border-b-0 lg:border-r-4 border-navy bg-parchment p-4 flex flex-col justify-between">
               <div>
                 <div class="font-grotesk font-extrabold text-lg text-navy mb-3">Messages & Chats</div>

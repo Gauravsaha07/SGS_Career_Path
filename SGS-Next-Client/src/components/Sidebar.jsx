@@ -4,7 +4,6 @@ import { useSelector } from "react-redux";
 export default function Sidebar({ activeTab = 'overview', role }) {
   const { user } = useSelector(state => state.auth);
 
-  // Normalize role case-insensitively from logged-in userType or prop
   const effectiveRole = (user?.userType || role || 'student').toLowerCase();
 
   const studentNav = [
@@ -14,7 +13,6 @@ export default function Sidebar({ activeTab = 'overview', role }) {
     { id: 'credits', label: 'My Credits & Wallet', link: "/auth/profile/my-credits", icon: '🪙' },
     { id: 'become_counselor', label: 'Join as Counselor', link: "/auth/profile/become-counselor", icon: '🎓' },
   ].filter(item => {
-    // Hide 'Join as Counselor' for users who are already counselors or admins
     if (item.id === 'become_counselor' && (effectiveRole === 'counselor' || effectiveRole === 'admin')) {
       return false;
     }
@@ -55,7 +53,6 @@ export default function Sidebar({ activeTab = 'overview', role }) {
   return (
     <aside className="hidden w-64 bg-parchment-card border-r-4 border-navy p-4 md:flex flex-col justify-between min-h-[calc(100vh-65px)]">
       <div className="space-y-6">
-        {/* Navigation Items */}
         <nav className="space-y-2">
           {items.map((item) => (
             <Link

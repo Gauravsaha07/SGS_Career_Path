@@ -1,19 +1,6 @@
 import { useState } from "react";
 import { AlertTriangle, XCircle, X } from "lucide-react";
 
-/**
- * AlertModal — neo-brutalist error/warning modal
- * matches the CareerBridge style: thick black borders, hard offset shadows,
- * mono uppercase labels, pill buttons, navy ink on off-white.
- *
- * Props:
- *  - open: boolean
- *  - type: "error" | "warning"
- *  - title: string
- *  - message: string
- *  - confirmLabel / cancelLabel: string
- *  - onConfirm / onClose: functions
- */
 function AlertModal({
     open,
     type = "error",
@@ -56,13 +43,11 @@ function AlertModal({
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            {/* backdrop */}
             <div
                 className="absolute inset-0 bg-slate-950/60 backdrop-blur-[2px]"
                 onClick={onClose}
             />
 
-            {/* modal card */}
             <div
                 className="relative w-full max-w-sm bg-[#F5F4FB] border-[3px] border-slate-950
                    rounded-2xl shadow-[8px_8px_0_0_rgba(2,6,23,1)]
@@ -71,10 +56,8 @@ function AlertModal({
                 aria-modal="true"
                 aria-labelledby="alert-modal-title"
             >
-                {/* top accent stripe */}
                 <div className={`h-2 w-full ${theme.stripe} border-b-[3px] border-slate-950`} />
 
-                {/* close button */}
                 <button
                     onClick={onClose}
                     aria-label="Close"
@@ -88,7 +71,6 @@ function AlertModal({
                 </button>
 
                 <div className="p-6 pt-7">
-                    {/* badge */}
                     <span
                         className={`inline-block font-mono text-xs font-bold tracking-wider
                         px-3 py-1 rounded-full border-2 border-slate-950
@@ -97,7 +79,6 @@ function AlertModal({
                         {theme.badgeText}
                     </span>
 
-                    {/* icon + title */}
                     <div className="flex items-center gap-4 mt-4">
                         <div
                             className={`shrink-0 w-14 h-14 rounded-full flex items-center justify-center
@@ -113,15 +94,12 @@ function AlertModal({
                         </h2>
                     </div>
 
-                    {/* message */}
                     <p className="mt-4 text-sm text-slate-700 leading-relaxed">
                         {message}
                     </p>
 
-                    {/* divider */}
                     <div className="mt-6 border-t-2 border-dashed border-slate-300" />
 
-                    {/* actions */}
                     <div className="flex items-center justify-end gap-3 mt-5">
                         <button
                             onClick={onClose}

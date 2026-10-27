@@ -82,7 +82,6 @@ export default function CareerExplorer() {
         <Sidebar activeTab="explorer" role="student" />
 
         <main class="flex-1 p-8 bg-grid-pattern overflow-y-auto">
-          {/* Header Banner */}
           <div class="mb-8">
             <div class="inline-block bg-yellow border-3 border-navy px-3 py-1 rounded-full shadow-pop-sm font-mono text-xs font-bold text-navy mb-2">
               CAREER DIRECTORY 2026
@@ -95,7 +94,6 @@ export default function CareerExplorer() {
             </p>
           </div>
 
-          {/* Search & Filter Bar */}
           <div class="bg-parchment-card border-4 border-navy rounded-3xl p-6 shadow-pop mb-8">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div class="md:col-span-2">
@@ -137,7 +135,6 @@ export default function CareerExplorer() {
             </div>
           </div>
 
-          {/* Careers Grid */}
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {careers.map((career) => (
               <Card key={career.id} color="white" className="flex flex-col justify-between hover:translate-y-[-2px] transition-all">

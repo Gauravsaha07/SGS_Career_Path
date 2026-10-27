@@ -7,7 +7,6 @@ import Credit from "../models/creditModel.js";
 import Counselor from "../models/counselorModel.js";
 import Roadmap from "../models/roadmapModel.js";
 
-// Cache store with TTL for fast repeated queries
 const roadmapCache = new Map();
 const adminAiCache = new Map();
 
@@ -29,7 +28,6 @@ const setCachedItem = (cache, key, value) => {
   cache.set(key, { value, timestamp: Date.now() });
 };
 
-// Helper: Call Gemini with timeout and retry
 const callGemini = async (prompt, retries = 1, timeoutMs = 40000) => {
   const model = process.env.GEMINI_MODEL || "gemini-flash-lite-latest";
   const ai = new GoogleGenAI({});
@@ -52,7 +50,6 @@ const callGemini = async (prompt, retries = 1, timeoutMs = 40000) => {
       throw new Error("No output generated from Gemini AI");
     } catch (err) {
       if (attempt === retries) throw err;
-      // Brief pause before retry for transient 503/network spikes
       await new Promise(r => setTimeout(r, 800));
     }
   }
@@ -85,7 +82,6 @@ export const generateRoadmap = async (req, res) => {
       throw new Error("AI service unavailable: Missing GEMINI_API_KEY. Please set it in .env");
     }
 
-    // Check fast cache (1 hour TTL)
     const cacheKey = `${interest.toLowerCase().trim()}_${skill_level.toLowerCase()}_${learning_mode.toLowerCase()}`;
     let data = getCachedItem(roadmapCache, cacheKey, 60 * 60 * 1000);
 
@@ -111,14 +107,12 @@ Include key milestones, tools, and salary expectations in INR.`;
       setCachedItem(roadmapCache, cacheKey, data);
     }
 
-    // Deduct credits AFTER successful generation atomically
     const updatedUser = await User.findByIdAndUpdate(
       user._id,
       { $inc: { credits: -1 } },
       { returnDocument: 'after' }
     );
 
-    // Record credit transaction
     await Credit.create({
       user: user._id,
       credits: -1,
@@ -224,12 +218,10 @@ export const adminAiChat = async (req, res) => {
       throw new Error("AI Assistant unavailable: Missing GEMINI_API_KEY.");
     }
 
-    // Check fast cache (10 minutes TTL)
     const cacheKey = question.toLowerCase().trim();
     let data = getCachedItem(adminAiCache, cacheKey, 10 * 60 * 1000);
 
     if (!data) {
-      // Optimized parallel aggregate queries instead of sequential full table dumps
       const [userCount, counselorCount, careerDocs, categoryDocs, creditSummary] = await Promise.all([
         User.countDocuments(),
         Counselor.countDocuments({ status: "accepted" }),

@@ -76,7 +76,6 @@ export default function CounselorList() {
         <Sidebar activeTab="counselors" role="student" />
 
         <main class="flex-1 p-8 bg-grid-pattern overflow-y-auto">
-          {/* Header Banner */}
           <div class="mb-8">
             <div class="inline-block bg-yellow border-3 border-navy px-3 py-1 rounded-full shadow-pop-sm font-mono text-xs font-bold text-navy mb-2">
               VERIFIED MENTORS DIRECTORY
@@ -89,7 +88,6 @@ export default function CounselorList() {
             </p>
           </div>
 
-          {/* Filter & Search Bar */}
           <div class="bg-parchment-card border-4 border-navy rounded-3xl p-6 shadow-pop mb-8">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div class="md:col-span-2">
@@ -130,7 +128,6 @@ export default function CounselorList() {
             </div>
           </div>
 
-          {/* Counselors Grid */}
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             {counselors.map((counselor) => (
               <Card key={counselor.id} color="white" className="flex flex-col justify-between">

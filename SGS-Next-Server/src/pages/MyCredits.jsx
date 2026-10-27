@@ -26,7 +26,6 @@ export default function MyCredits() {
         <Sidebar activeTab="credits" role="student" />
 
         <main class="flex-1 p-8 bg-grid-pattern overflow-y-auto">
-          {/* Header & Balance Banner */}
           <div class="bg-yellow border-4 border-navy rounded-3xl p-8 shadow-pop mb-8 relative">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
               <div>
@@ -49,7 +48,6 @@ export default function MyCredits() {
             </div>
           </div>
 
-          {/* Top-up Packs Section */}
           <div class="mb-10">
             <h2 class="font-grotesk font-extrabold text-2xl text-navy mb-2">Buy Credit Top-Up Packs</h2>
             <p class="font-body text-xs text-navy-muted mb-6">Instant credit delivery via UPI, GPay, PhonePe, or Net Banking.</p>
@@ -93,7 +91,6 @@ export default function MyCredits() {
             </div>
           </div>
 
-          {/* Transaction History Ledger */}
           <div class="bg-parchment-card border-4 border-navy rounded-3xl p-6 shadow-pop">
             <h2 class="font-grotesk font-extrabold text-xl text-navy mb-4">Credit Transaction Ledger</h2>
             <div class="overflow-x-auto">

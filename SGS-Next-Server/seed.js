@@ -30,7 +30,6 @@ export const seedDatabase = async () => {
         }
         console.log("🌱 Running idempotent database seed check...");
 
-        // 1. Seed Categories if missing
         let categoriesAdded = 0;
         for (const cat of defaultCategories) {
             const exists = await Category.findOne({ title: cat.title });
@@ -46,7 +45,6 @@ export const seedDatabase = async () => {
         allCategories.forEach(c => { catMap[c.title] = c._id; });
         const defaultCatId = allCategories[0]?._id;
 
-        // 2. Seed Careers if missing
         const sampleCareers = [
             {
                 title: 'Full-Stack Web Engineer',
@@ -127,7 +125,6 @@ export const seedDatabase = async () => {
         const totalCareers = await Career.countDocuments();
         console.log(`ℹ️ Careers verified (Total: ${totalCareers}, Newly Added: ${careersAdded}).`);
 
-        // 3. Seed Sample Counselor if none exist
         const counselorCount = await Counselor.countDocuments();
         if (counselorCount === 0) {
             const counselorEmail = "mentor.ramesh@careerbridge.in";

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 
-// Import all 20 page screens for workshop previewing
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -59,13 +58,11 @@ export default function App() {
     ]},
   ];
 
-  // Flattened list to quickly find active component
   const allItems = screens.flatMap(s => s.items);
   const currentItem = allItems.find(item => item.id === activeScreen) || allItems[0];
 
   return (
     <div class="relative min-h-screen">
-      {/* Floating Interactive Workshop Screen Switcher Bar */}
       <div class="fixed bottom-4 right-4 z-50 flex flex-col items-end">
         {isOpen ? (
           <div class="bg-navy border-4 border-yellow p-4 rounded-2xl shadow-pop-lg max-w-sm text-white font-grotesk space-y-3">
@@ -124,7 +121,6 @@ export default function App() {
         )}
       </div>
 
-      {/* Render Current Active Page Component */}
       {currentItem.component}
     </div>
   );

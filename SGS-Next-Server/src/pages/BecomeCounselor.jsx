@@ -13,7 +13,6 @@ export default function BecomeCounselor() {
         <Sidebar activeTab="become_counselor" role="student" />
 
         <main class="flex-1 p-8 bg-grid-pattern overflow-y-auto">
-          {/* Header */}
           <div class="mb-8 max-w-3xl">
             <div class="inline-block bg-yellow border-3 border-navy px-3 py-1 rounded-full shadow-pop-sm font-mono text-xs font-bold text-navy mb-2">
               COUNSELOR PARTNER PROGRAM
@@ -27,7 +26,6 @@ export default function BecomeCounselor() {
           </div>
 
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Application Form */}
             <div class="lg:col-span-2">
               <div class="bg-parchment-card border-4 border-navy rounded-3xl p-8 shadow-pop relative">
                 <div class="text-center mb-6 pb-6 border-b-2 border-navy/20">
@@ -112,7 +110,6 @@ export default function BecomeCounselor() {
                     ></textarea>
                   </div>
 
-                  {/* Document Upload Mock */}
                   <div class="bg-sky/20 border-2 border-dashed border-navy p-4 rounded-xl text-center">
                     <div class="font-grotesk font-bold text-xs text-navy">📄 Upload Verification Document (ID / Work Email)</div>
                     <div class="font-mono text-[10px] text-navy-muted mt-1">PDF or PNG file up to 10MB (Mock Upload)</div>
@@ -130,7 +127,6 @@ export default function BecomeCounselor() {
               </div>
             </div>
 
-            {/* Perks Side Card */}
             <div class="space-y-6">
               <div class="bg-yellow border-4 border-navy rounded-3xl p-6 shadow-pop">
                 <StatusBadge text="MENTOR BENEFITS" status="success" />
