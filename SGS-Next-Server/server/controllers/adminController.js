@@ -111,15 +111,16 @@ const getCounselors = async (req, res) => {
         user: c.user || {
             _id: null,
             name: c.name || "Applicant (User Deleted)",
-            email: "deleted@careerbridge.in",
-            phone: "N/A",
-            location: "Unknown Location",
-            qualification: "N/A",
+            email: c.email || "deleted@careerbridge.in",
+            phone: c.phone || "N/A",
+            location: c.location || "Unknown Location",
+            qualification: c.qualification || "N/A",
+            profilePic: c.profilePic || "",
             credits: 0
         },
         category: c.category || {
             _id: null,
-            title: "General / Uncategorized"
+            title: c.categoryTitle || "General / Uncategorized"
         }
     }));
 
@@ -143,7 +144,22 @@ const updateCounselor = async (req, res) => {
     ).populate('user').populate('category').lean();
 
     if (req.body.status === "accepted" && counselor.user) {
-        await User.findByIdAndUpdate(counselor.user, { userType: "COUNSELOR" }, { returnDocument: 'after' });
+        const userDoc = await User.findByIdAndUpdate(counselor.user, { userType: "COUNSELOR" }, { returnDocument: 'after' });
+        if (userDoc) {
+            await Counselor.findByIdAndUpdate(counselor._id, {
+                name: userDoc.name,
+                email: userDoc.email,
+                phone: userDoc.phone,
+                qualification: userDoc.qualification,
+                location: userDoc.location,
+                profilePic: userDoc.profilePic,
+                isActive: true,
+                isAvailable: true
+            });
+        }
+    } else if (req.body.status === "rejected" && counselor.user) {
+        await User.findByIdAndUpdate(counselor.user, { userType: "STUDENT" });
+        await Counselor.findByIdAndUpdate(counselor._id, { isActive: false });
     }
 
     if (!updatedCounselor) {
@@ -156,15 +172,16 @@ const updateCounselor = async (req, res) => {
         user: updatedCounselor.user || {
             _id: null,
             name: updatedCounselor.name || "Applicant (User Deleted)",
-            email: "deleted@careerbridge.in",
-            phone: "N/A",
-            location: "Unknown Location",
-            qualification: "N/A",
+            email: updatedCounselor.email || "deleted@careerbridge.in",
+            phone: updatedCounselor.phone || "N/A",
+            location: updatedCounselor.location || "Unknown Location",
+            qualification: updatedCounselor.qualification || "N/A",
+            profilePic: updatedCounselor.profilePic || "",
             credits: 0
         },
         category: updatedCounselor.category || {
             _id: null,
-            title: "General / Uncategorized"
+            title: updatedCounselor.categoryTitle || "General / Uncategorized"
         }
     };
 

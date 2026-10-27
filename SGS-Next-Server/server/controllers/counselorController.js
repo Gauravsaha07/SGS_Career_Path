@@ -15,7 +15,7 @@ const DEFAULT_SLOTS = [
 
 const becomeCounselor = async (req, res) => {
     let userId = req.user.id;
-    const { category, experience } = req.body;
+    const { category, experience, bio, phone } = req.body;
 
     if (!category || !experience) {
         res.status(400);
@@ -33,6 +33,13 @@ const becomeCounselor = async (req, res) => {
         throw new Error("Experience Must Be 2 or 2+");
     }
 
+    const applicantBio = bio || req.user.bio || `Senior ${categoryExist.title} mentor with ${experience}+ years of professional experience.`;
+    const applicantPhone = phone || req.user.phone || "";
+
+    if (phone && !req.user.phone) {
+        await User.findByIdAndUpdate(userId, { phone }).catch(() => {});
+    }
+
     const existing = await Counselor.findOne({ user: userId });
     if (existing) {
         if (existing.status === "pending") {
@@ -47,12 +54,39 @@ const becomeCounselor = async (req, res) => {
                 counselor: existing
             });
         }
+        // If rejected, allow re-application by updating existing record back to pending
+        existing.category = category;
+        existing.categoryTitle = categoryExist.title;
+        existing.experience = Number(experience);
+        existing.status = "pending";
+        existing.name = req.user.name;
+        existing.email = req.user.email;
+        existing.phone = applicantPhone;
+        existing.location = req.user.location || "";
+        existing.qualification = req.user.qualification || "";
+        existing.profilePic = req.user.profilePic || "";
+        existing.bio = applicantBio;
+        existing.availableSlots = existing.availableSlots?.length ? existing.availableSlots : DEFAULT_SLOTS;
+        await existing.save();
+
+        return res.status(200).json({
+            message: "Counselor Request Re-submitted. Wait For Admin Approval",
+            counselor: existing
+        });
     }
 
     let counselor = await Counselor.create({
         user: userId,
         category,
-        experience,
+        categoryTitle: categoryExist.title,
+        experience: Number(experience),
+        name: req.user.name,
+        email: req.user.email,
+        phone: applicantPhone,
+        location: req.user.location || "",
+        qualification: req.user.qualification || "",
+        profilePic: req.user.profilePic || "",
+        bio: applicantBio,
         availableSlots: DEFAULT_SLOTS
     });
 
@@ -64,7 +98,10 @@ const becomeCounselor = async (req, res) => {
 
 const getMyApplication = async (req, res) => {
     try {
-        const counselor = await Counselor.findOne({ user: req.user.id }).populate('category');
+        let counselor = await Counselor.findOne({ user: req.user.id }).populate('category');
+        if (!counselor && req.user.email) {
+            counselor = await Counselor.findOne({ email: req.user.email }).populate('category');
+        }
         res.status(200).json(counselor || null);
     } catch (error) {
         res.status(500).json({ message: error.message });
