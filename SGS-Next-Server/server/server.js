@@ -1,6 +1,5 @@
+import "dotenv/config"
 import express from "express"
-import dotenv from "dotenv"
-dotenv.config()
 import colors from "colors"
 import http from "http"
 import compression from "compression"

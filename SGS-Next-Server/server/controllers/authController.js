@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/userModel.js";
 import Credit from "../models/creditModel.js";
+import Counselor from "../models/counselorModel.js";
 import fs from "node:fs";
 import uploadToCloudinary from "../middleware/cloudinaryMiddleware.js";
 
@@ -246,6 +247,10 @@ const updateProfile = async (req, res) => {
             const uploadResult = await uploadToCloudinary(req.file.path);
             if (uploadResult && uploadResult.secure_url) {
                 user.profilePic = uploadResult.secure_url;
+                await Counselor.findOneAndUpdate(
+                    { user: user._id },
+                    { profilePic: uploadResult.secure_url }
+                );
             }
         } catch (e) {
             console.error("Cloudinary upload failed during profile update:", e.message);

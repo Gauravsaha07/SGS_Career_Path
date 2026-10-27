@@ -268,8 +268,12 @@ export default function ChatPage() {
                           }`}
                         >
                           <div className="flex items-center space-x-3 overflow-hidden">
-                            <div className="w-10 h-10 rounded-xl bg-sky border-2 border-navy flex items-center justify-center font-grotesk font-extrabold text-sm text-navy shadow-pop-sm shrink-0">
-                              {avatarInitials}
+                            <div className="w-10 h-10 rounded-xl bg-sky border-2 border-navy flex items-center justify-center font-grotesk font-extrabold text-sm text-navy shadow-pop-sm overflow-hidden shrink-0">
+                              {c.user?.profilePic ? (
+                                <img className="w-full h-full object-cover" src={c.user.profilePic} alt={partnerName} />
+                              ) : (
+                                <span>{avatarInitials}</span>
+                              )}
                             </div>
                             <div className="truncate">
                               <div className="font-grotesk font-extrabold text-sm text-navy truncate">{partnerName}</div>
@@ -298,8 +302,12 @@ export default function ChatPage() {
               {/* Chat Window Header */}
               <div className="p-4 border-b-4 border-navy bg-yellow/30 flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-xl bg-sky border-2 border-navy flex items-center justify-center font-grotesk font-extrabold text-sm text-navy">
-                    {getInitials(activePartner?.name)}
+                  <div className="w-10 h-10 rounded-xl bg-sky border-2 border-navy flex items-center justify-center font-grotesk font-extrabold text-sm text-navy overflow-hidden shrink-0">
+                    {activePartner?.profilePic ? (
+                      <img className="w-full h-full object-cover" src={activePartner.profilePic} alt={activePartner?.name} />
+                    ) : (
+                      <span>{getInitials(activePartner?.name)}</span>
+                    )}
                   </div>
                   <div>
                     <h2 className="font-grotesk font-extrabold text-base text-navy">
